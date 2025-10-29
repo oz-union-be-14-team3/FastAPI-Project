@@ -21,6 +21,10 @@ beautifulsoup4 = "^4.14.2"
 selenium = "^4.38.0"
 
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.2"
+pytest-asyncio = "^1.2.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
@@ -36,12 +40,4 @@ location = "./migrations"
 src_folder = "./."
 
 
-
-[tool.aerich]
-
-tortoise_orm = "app.db.migrations.TORTOISE_ORM"
-
-location = "./migrations"
-
-src_folder = "./."
 

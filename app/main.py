@@ -8,7 +8,9 @@ from app.models.question import Question
 import re
 import uvicorn
 
-app = FastAPI()
+from app.db.base import db_connection  
+
+app = FastAPI(title="Diary CRUD API")
 
 db_connection(app)
 
