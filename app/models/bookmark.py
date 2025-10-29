@@ -23,3 +23,9 @@ class Bookmark(Model):
 
     class Meta:
         table = "bookmarks"
+
+
+
+
+
+        
