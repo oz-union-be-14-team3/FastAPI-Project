@@ -6,5 +6,6 @@ class DiaryCreate(BaseModel):
 
 class DiaryResponse(BaseModel):
     id : int
+    user_id : int
     title : str
     content : str

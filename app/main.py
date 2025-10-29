@@ -1,3 +1,5 @@
+from app.api.v1 import auth, diary
+
 from fastapi import FastAPI
 from app.db.base import db_connection
 from app.api.v1.question import router
@@ -11,6 +13,8 @@ app = FastAPI()
 db_connection(app)
 
 app.include_router(router)
+app.include_router(auth.router)
+app.include_router(diary.router)
 
 
 
