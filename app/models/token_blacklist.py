@@ -1,15 +1,20 @@
-from tortoise import fields, models
-from app.models.user import User
+from tortoise import fields
+from tortoise.models import Model
+from typing import TYPE_CHECKING
 
-class TokenBlacklist(models.Model):
+if TYPE_CHECKING:
+    from app.models.user import User
+
+
+class TokenBlacklist(Model):
     id = fields.IntField(pk=True)
-    token = fields.CharField(max_length=255, unique=True)
-    user = fields.ForeignKeyField("models.User", related_name="blacklisted_tokens")
-    expired_at = fields.DatetimeField()
+    token = fields.CharField(max_length=255)
+    user = fields.ForeignKeyField(
+        "models.User",
+        related_name="token_blacklists",
+        on_delete=fields.CASCADE, index=True
+    )
+    expired_at = fields.DatetimeField(null=True)
 
     class Meta:
         table = "token_blacklist"
-
-
-    def __str__(self):
-        return f"TokenBlacklist(user={self.user.username}, token={self.token[:10]}...)"
