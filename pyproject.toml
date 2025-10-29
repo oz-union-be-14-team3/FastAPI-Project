@@ -15,6 +15,10 @@ aerich = "^0.9.2"
 asyncpg = "^0.30.0"
 
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.2"
+pytest-asyncio = "^1.2.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
