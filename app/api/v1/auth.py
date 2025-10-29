@@ -1,6 +1,7 @@
 from fastapi import APIRouter,Depends
 from app.schemas.user import UserCreate, UserLogin, UserResponse
 from app.services.auth_service import AuthService
+from fastapi.security import HTTPAuthorizationCredentials
 from app.core.dependencies import oauth2_scheme,get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -16,8 +17,8 @@ async def login(user: UserLogin):
 
 @router.post("/logout")
 async def logout(
-    token: str = Depends(oauth2_scheme),
+    token: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
     current_user = Depends(get_current_user)
 ):
-    return await AuthService.logout(token, current_user)
-
+    token_str = token.credentials 
+    return await AuthService.logout(token_str, current_user)

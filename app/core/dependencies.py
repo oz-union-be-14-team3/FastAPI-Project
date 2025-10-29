@@ -3,11 +3,12 @@ from jose import jwt, JWTError
 from app.core.config import settings
 from app.repositories.user_repo import UserRepository
 from app.repositories.token_repo import TokenRepository
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = HTTPBearer()
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: HTTPAuthorizationCredentials = Depends(oauth2_scheme)):
+    token = token.credentials
     # 로그아웃된(블랙리스트) 토큰인지 확인
     if await TokenRepository.is_blacklisted(token):
         raise HTTPException(status_code=401, detail="Token has been revoked")
