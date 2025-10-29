@@ -2,8 +2,20 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.models.diary import Diary
 from app.core.dependencies import get_current_user
 from app.models.user import User
+from app.schemas.diary import DiaryCreate, DiaryResponse
+from app.repositories.diary_repo import DiaryRepository
 
 router = APIRouter(prefix="/diary", tags=["Diary"])
+
+@router.get("/", response_model=list[DiaryResponse])
+async def read_all_diary(current_user: User = Depends(get_current_user)):
+    all_diary = await DiaryRepository.get_all_diary()
+    return all_diary
+
+@router.post("/")
+async def create_diary(data: DiaryCreate ,current_user: User = Depends(get_current_user)):
+    new_diary = await DiaryRepository.create_diary(title=data.title, content=data.content, user=current_user)
+    return "Diary post successfully"
 
 @router.put("/{diary_id}")
 async def update_diary(
