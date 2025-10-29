@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from jose import jwt, JWTError
 from app.core.config import settings
 from app.repositories.user_repo import UserRepository
@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-async def get_current_user(token: str):
+async def get_current_user(token: str = Depends(oauth2_scheme)):
     # 로그아웃된(블랙리스트) 토큰인지 확인
     if await TokenRepository.is_blacklisted(token):
         raise HTTPException(status_code=401, detail="Token has been revoked")
