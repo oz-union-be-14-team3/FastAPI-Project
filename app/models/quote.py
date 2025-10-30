@@ -4,7 +4,7 @@ from tortoise.models import Model
 
 class Quote(Model):
     id = fields.IntField(pk=True)
-    content = fields.TextField()
+    content = fields.TextField()  # unique=True
     author = fields.CharField(max_length=100, null=True)
 
     bookmarks: fields.ReverseRelation["Bookmark"]
