@@ -111,21 +111,45 @@
       font-family:inherit;
     }
 
-    /* 왼쪽 목록 */
-    .toc{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px }
-    .toc li{
-      display:flex; flex-direction:column; gap:4px;
-      padding:8px 6px; border-radius:8px;
-      cursor:pointer; transition:.08s; line-height:1.25;
-      position:relative;
-    }
-    .toc li:hover{ background:rgba(0,0,0,.04); transform:translateX(2px) }
-    .toc .title-line{ font-size:20px }
-    .toc .meta{
-      color:var(--muted); font-size:14px;
-      text-align:right;
-      width:100%;
-    }
+/* 왼쪽 목록 (한 줄 형식으로 정리) */
+.toc {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* 위아래 간격 줄임 */
+}
+.toc li {
+  display: flex;
+  justify-content: space-between; /* 제목 - 날짜를 한 줄로 */
+  align-items: center;
+  padding: 4px 6px; /* 세로 패딩 최소화 */
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .08s, transform .08s;
+  font-size: 17px;
+  line-height: 1.3;
+}
+.toc li:hover {
+  background: rgba(0,0,0,.04);
+  transform: translateX(2px);
+}
+.toc .title-line {
+  font-size: 17px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.toc .meta {
+  color: var(--muted);
+  font-size: 13px;
+  margin-left: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 
     /* 오른쪽 본문 */
     .doc{ position:relative; padding-top:30px; }
