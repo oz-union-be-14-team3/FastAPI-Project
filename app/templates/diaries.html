@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quote Diary — 펼친 공책</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Patrick+Hand&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --paper:#f7f1e3; --paper2:#fbf7ee; --line:#b7b7b7; --hole:#2a2a2a; --ink:#2b2b2b;
+      --muted:#6b6b6b; --shadow:rgba(0,0,0,.12); --accent:#0a4b5c; --red:#b83a3a; --green:#1c7c54;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:#e7e2d8;
+      font-family:"Patrick Hand","Nanum Pen Script",system-ui,-apple-system,Segoe UI,sans-serif;
+      color:var(--ink);
+      letter-spacing:.15px;
+      font-size:17px;
+    }
+
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:36px 16px;
+      position:relative;
+      gap:14px;
+    }
+
+    /* 📖 책 */
+    .book{
+      position:relative; width:min(1080px,95vw); background:#d7c9b6; border-radius:18px;
+      box-shadow:inset 0 0 0 2px rgba(0,0,0,.05), 0 22px 50px var(--shadow);
+      padding:18px;
+      z-index:10;
+    }
+    .spine{
+      position:absolute; top:0; bottom:0; left:50%; width:20px; transform:translateX(-50%);
+      background:repeating-linear-gradient(#2a2a2a 0 12px,#565656 12px 24px);
+      border-left:2px solid rgba(255,255,255,.25); border-right:2px solid rgba(0,0,0,.25);
+      z-index:2;
+    }
+
+    .spread{
+      display:grid; grid-template-columns:1fr 1fr; gap:0; position:relative; z-index:1;
+      border-radius:14px;
+    }
+    .page{
+      background:
+        repeating-linear-gradient(#0000,#0000 30px, rgba(0,0,0,.07) 31px, #0000 32px),
+        var(--paper);
+      padding:28px 26px 30px;
+      min-height:580px;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
+      position:relative;
+      font-size:17px;
+    }
+    .left{
+      background:
+        repeating-linear-gradient(#0000,#0000 30px, rgba(0,0,0,.07) 31px, #0000 32px),
+        var(--paper2);
+      border-right:1.5px dashed rgba(0,0,0,.15);
+    }
+    .right{
+      background:
+        repeating-linear-gradient(#0000,#0000 30px, rgba(0,0,0,.07) 31px, #0000 32px),
+        var(--paper);
+      border-left:1.5px dashed rgba(0,0,0,.15);
+      max-height:calc(100vh - 180px);
+      overflow:auto;
+    }
+
+    .holes{
+      position:absolute; left:10px; top:46px; display:flex; flex-direction:column; gap:110px;
+    }
+    .holes span{
+      width:10px; height:10px; border-radius:50%; background:var(--hole);
+      box-shadow:0 1px 0 rgba(255,255,255,.4) inset; opacity:.65;
+    }
+
+    .title{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      font-size:30px;
+      margin:0 0 10px;
+    }
+    .subtitle{ color:var(--muted); font-size:17px; margin-bottom:12px }
+
+    /* 상단 툴바 */
+    .toolbar{
+      display:flex; gap:8px; align-items:center; margin:6px 0 12px;
+      color:var(--muted); font-size:16px;
+    }
+    .toolbar .link{ all:unset; cursor:pointer; text-decoration:underline; color:var(--accent);}
+    .toolbar .search-wrap{
+      margin-left:8px;
+      background:rgba(255,255,255,.25);
+      border:1.5px dashed rgba(0,0,0,.15);
+      border-radius:10px;
+      padding:3px 8px 5px;
+      display:flex; gap:6px; align-items:center;
+      font-family:"Nanum Pen Script","Patrick Hand",cursive;
+    }
+    .toolbar .search-label{ font-size:16px; color:#555; }
+    .toolbar .search-input{
+      border:none; background:transparent; outline:none;
+      font-size:17px; min-width:110px;
+      font-family:inherit;
+    }
+
+    /* 왼쪽 목록 */
+    .toc{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px }
+    .toc li{
+      display:flex; flex-direction:column; gap:4px;
+      padding:8px 6px; border-radius:8px;
+      cursor:pointer; transition:.08s; line-height:1.25;
+      position:relative;
+    }
+    .toc li:hover{ background:rgba(0,0,0,.04); transform:translateX(2px) }
+    .toc .title-line{ font-size:20px }
+    .toc .meta{
+      color:var(--muted); font-size:14px;
+      text-align:right;
+      width:100%;
+    }
+
+    /* 오른쪽 본문 */
+    .doc{ position:relative; padding-top:30px; }
+    .doc .id-badge{
+      position:absolute; top:0; right:0;
+      font-size:16px; color:#555;
+      background:rgba(255,255,255,.35);
+      padding:4px 10px;
+      border:1px dashed rgba(0,0,0,.08);
+      border-radius:8px;
+    }
+    .doc h3{ margin:0 0 6px; font-size:28px }
+    .doc .meta{ color:var(--muted); font-size:15px; margin-bottom:10px }
+    .doc .content{
+      white-space:pre-wrap; line-height:1.6; font-size:19px;
+      overflow-wrap:anywhere; word-break:break-word;
+    }
+    .empty{ color:var(--muted) }
+
+    .actions{ margin-top:10px; display:flex; gap:14px; font-size:16px; color:var(--accent) }
+    .link{ all:unset; color:var(--accent); cursor:pointer; text-decoration:underline }
+    .link:hover{ filter:brightness(1.1) }
+    .danger{ color:var(--red) }
+
+    /* 공용 시트 (작성/수정) */
+    .sheet{
+      position:fixed; left:50%; bottom:-80%; transform:translateX(-50%) rotate(-0.6deg);
+      width:min(820px,94vw); background:#fffdf6; border-radius:14px;
+      box-shadow:0 22px 60px rgba(0,0,0,.28); border:2px solid rgba(0,0,0,.12);
+      padding:18px 20px 22px; transition:bottom .5s cubic-bezier(.2,.9,.15,1), transform .4s; z-index:70;
+      font-size:17px;
+    }
+    .sheet.open{ bottom:6%; transform:translateX(-50%) rotate(0) }
+    .sheet::before{
+      content:""; position:absolute; left:0; right:0; top:-1px; height:28px; background:
+        radial-gradient(circle at 8% 20%, #0000 10px, rgba(0,0,0,.08) 11px, #0000 12px) left/140px 26px repeat-x,
+        radial-gradient(circle at 28% 70%, #0000 8px, rgba(0,0,0,.06) 9px, #0000 10px) left/120px 26px repeat-x,
+        linear-gradient(#fffdf6,#fffdf6);
+      pointer-events:none;
+    }
+    .sheet h4{ margin:0 0 10px; font-size:24px }
+    .row{ display:flex; gap:10px; align-items:center }
+    label{ font-size:17px }
+    .input, textarea{
+      width:100%; padding:10px 12px; border:1.8px solid rgba(0,0,0,.25);
+      background:#fffef7; border-radius:10px; font-size:19px;
+      outline:none;
+      box-shadow:inset 0 2px 0 rgba(0,0,0,.05);
+    }
+    textarea{ min-height:160px; resize:vertical }
+    .msg{ margin-top:6px; min-height:20px; font-size:16px }
+    .success{ color:var(--green) } .error{ color:var(--red) }
+    .sheet-actions{ display:flex; gap:14px; margin-top:12px; font-size:16px }
+    .sheet .close{ all:unset; position:absolute; top:10px; right:10px; padding:6px 10px;
+      border:2px solid #111; border-radius:10px; cursor:pointer; font-weight:700; background:#fff }
+
+    /* 🧨 삭제 시트 */
+    #delete-sheet{ z-index:75; }
+
+    /* 페이지 네비 (왼쪽에만) */
+    .nav-wrap{
+      position:absolute; bottom:8px; left:10px; right:10px;
+      display:flex; align-items:center; justify-content:space-between;
+      font-family:"Nanum Pen Script","Patrick Hand",cursive;
+    }
+    .scribble-link{ all:unset; cursor:pointer; text-decoration:underline; padding:2px 4px; color:#0a4b5c; font-size:18px; }
+    .scribble-link[aria-disabled="true"]{ opacity:.35; cursor:default; text-decoration:none }
+    .page-num{ color:#666; font-size:17px }
+
+    /* 📅 달력 토글 (왼쪽 가운데) */
+    .calendar-toggle{
+      all:unset;
+      cursor:pointer;
+      font-family:"Nanum Pen Script","Patrick Hand",cursive;
+      color:#0a4b5c;
+      text-decoration:underline;
+      font-size:18px;
+      position:absolute;
+      left:20px;
+      top:50%;
+      transform:translateY(-50%);
+      user-select:none;
+      z-index:5;
+    }
+
+    /* 📅 달력 패널 - 왼쪽에서 슥 */
+    .calendar-panel{
+      position:fixed;
+      top:50%;
+      left:-290px;       /* 숨겨진 위치 */
+      transform:translateY(-50%) rotate(-1.5deg);
+      width:250px;
+      background:#fffdf6;
+      border:2px solid rgba(0,0,0,.12);
+      border-radius:14px;
+      box-shadow:0 14px 36px rgba(0,0,0,.25);
+      padding:12px 14px 16px;
+      transition:left .4s cubic-bezier(.2,.9,.15,1), transform .3s;
+      font-family:"Nanum Pen Script","Patrick Hand",cursive;
+      z-index:60;
+    }
+    .calendar-panel.open{
+      left:14px;
+      transform:translateY(-50%) rotate(0deg);
+    }
+    .calendar-panel::before{
+      content:"";
+      position:absolute; left:0; right:0; top:-1px; height:22px;
+      background:
+        radial-gradient(circle at 8% 20%, #0000 10px, rgba(0,0,0,.08) 11px, #0000 12px) left/140px 26px repeat-x,
+        linear-gradient(#fffdf6,#fffdf6);
+      pointer-events:none;
+    }
+    .cal-head{
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:8px;
+    }
+    .cal-title{ font-size:20px; }
+    .cal-nav{ display:flex; gap:6px; }
+    .cal-link{ all:unset; cursor:pointer; text-decoration:underline; color:#0a4b5c; }
+    .cal-grid{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:4px;
+      font-size:16px;
+    }
+    .cal-dow{ text-align:center; color:#666; font-size:14px; }
+    .cal-day{
+      text-align:center;
+      padding:4px 0;
+      border-radius:8px;
+      cursor:pointer;
+    }
+    .cal-day.has{
+      background:rgba(10,75,92,.08);
+      border:1px dashed rgba(10,75,92,.3);
+    }
+    .cal-day.selected{
+      background:#0a4b5c;
+      color:#fff;
+    }
+    .cal-foot{
+      margin-top:8px;
+      font-size:14px;
+      color:#555;
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+    }
+    .cal-close{
+      all:unset;
+      cursor:pointer;
+      text-decoration:underline;
+      color:#b83a3a;
+      font-size:14px;
+    }
+
+    /* 바깥 클릭용 오버레이 */
+    .calendar-overlay{
+      position:fixed;
+      inset:0;
+      background:transparent;
+      z-index:50;
+      display:none;
+    }
+    .calendar-overlay.show{ display:block; }
+
+    @media (max-width:860px){
+      .spread{ grid-template-columns:1fr }
+      .spine{ display:none }
+      .left{ border-right:none; border-bottom:1.5px dashed rgba(0,0,0,.15) }
+      .right{ border-left:none }
+      .right{ max-height:calc(100vh - 220px) }
+      .calendar-panel{
+        top:auto;
+        bottom:20px;
+        transform:translateY(0) rotate(-1.5deg);
+      }
+      .calendar-panel.open{
+        left:14px;
+        bottom:20px;
+      }
+      .calendar-toggle{
+        top:auto;
+        bottom:120px;
+        transform:none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 달력 바깥 클릭 닫기 -->
+  <div id="calendar-overlay" class="calendar-overlay"></div>
+
+  <div class="wrap">
+    <!-- 📖 공책 -->
+    <div class="book">
+      <div class="spine" aria-hidden="true"></div>
+
+      <div class="spread">
+        <!-- 왼쪽: 목록 -->
+        <section class="page left">
+          <div class="holes" aria-hidden="true"><span></span><span></span><span></span></div>
+
+          <h2 class="title">내 일기 <span class="subtitle" id="count"></span></h2>
+          <div class="toolbar">
+            <span class="link" id="link-new">✏️ 새 일기</span>
+            <span>·</span>
+            <span class="link" id="link-refresh">↻ 새로고침</span>
+            <!-- 검색 -->
+            <div class="search-wrap">
+              <span class="search-label">찾기:</span>
+              <input id="search" class="search-input" type="text" placeholder="제목/내용" />
+            </div>
+            <span style="margin-left:auto" class="link" id="link-logout">로그아웃</span>
+          </div>
+
+          <ul id="toc" class="toc"></ul>
+
+          <!-- 페이지 네비 -->
+          <div class="nav-wrap">
+            <span id="prevPage" class="scribble-link" aria-label="이전 페이지">&lt;</span>
+            <span class="page-num" id="pageNo">1 / 1</span>
+            <span id="nextPage" class="scribble-link" aria-label="다음 페이지">&gt;</span>
+          </div>
+        </section>
+
+        <!-- 오른쪽: 본문 -->
+        <section class="page right">
+          <div class="holes" aria-hidden="true" style="left:auto; right:10px;"><span></span><span></span><span></span></div>
+
+          <div class="doc" id="doc">
+            <h3 class="empty">제목</h3>
+            <p class="subtitle">왼쪽에서 일기를 고르거나 “새 일기”를 눌러줘 🪶</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- 📅 책 바깥 달력 토글 (왼쪽) -->
+    <button class="calendar-toggle" id="calendar-toggle">달력 꺼내기 →</button>
+  </div>
+
+  <!-- 작성/수정 시트 -->
+  <section class="sheet" id="sheet">
+    <button class="close" id="sheet-close">닫기</button>
+    <h4 id="sheet-title">새 일기</h4>
+    <div class="row" style="gap:12px; flex-wrap:wrap">
+      <div style="flex:1 1 100%">
+        <label for="d-title">제목</label>
+        <input id="d-title" class="input" type="text" placeholder="오늘의 한 줄 제목" />
+      </div>
+      <div style="flex:1 1 100%">
+        <label for="d-content">내용</label>
+        <textarea id="d-content" placeholder="기억하고 싶은 문장을 마음껏 적자 땃"></textarea>
+      </div>
+    </div>
+    <div class="sheet-actions">
+      <span class="link" id="sheet-save">저장</span>
+      <span class="link" id="sheet-cancel">취소</span>
+    </div>
+    <div id="sheet-msg" class="msg"></div>
+  </section>
+
+  <!-- 🧨 삭제 확인 시트 -->
+  <section class="sheet" id="delete-sheet">
+    <button class="close" id="delete-close">닫기</button>
+    <h4 style="color:#b83a3a; margin-bottom:6px;">이 일기 찢어버릴까?</h4>
+    <p id="delete-text" style="margin:0 0 12px; color:#444;">정말로 삭제할래?</p>
+    <div class="sheet-actions">
+      <span class="link danger" id="delete-confirm">삭제할래</span>
+      <span class="link" id="delete-cancel">안할래</span>
+    </div>
+    <div id="delete-msg" class="msg"></div>
+  </section>
+
+  <!-- 📅 달력 패널 (왼쪽에서) -->
+  <aside class="calendar-panel" id="calendar-panel" aria-label="달력으로 일기 찾기">
+    <div class="cal-head">
+      <span class="cal-title" id="cal-title">2025-10</span>
+      <span class="cal-nav">
+        <button class="cal-link" id="cal-prev">«</button>
+        <button class="cal-link" id="cal-next">»</button>
+      </span>
+    </div>
+    <div class="cal-grid" id="cal-grid">
+      <!-- JS로 채움 -->
+    </div>
+    <div class="cal-foot" id="cal-foot">
+      <span>날짜를 고르면 그날 일기만!</span>
+      <button class="cal-close" id="cal-close">달력 넣기</button>
+    </div>
+  </aside>
+
+  <script>
+    const $ = (s)=>document.querySelector(s);
+
+    function authHeaders(extra){
+      const token = localStorage.getItem('access_token');
+      return Object.assign({
+        'Content-Type':'application/json',
+        ...(token ? {'Authorization': 'Bearer ' + token} : {})
+      }, extra||{});
+    }
+    async function ensureAuth(){
+      const token = localStorage.getItem('access_token');
+      if(!token){ location.href='/auth'; return false; }
+      try{
+        const res = await fetch('/users/me', { headers: authHeaders() });
+        if(res.status===401 || res.status===403) throw new Error();
+        return true;
+      }catch{
+        localStorage.removeItem('access_token');
+        location.href='/auth';
+        return false;
+      }
+    }
+
+    // ===== 상태 =====
+    let current = { id:null, mode:'create' };
+    let cacheList = [];
+    let filtered = [];
+    const pageSize = 9;
+    let page = 1;
+    let totalPages = 1;
+
+    // 달력 상태
+    let calYear, calMonth;
+    let selectedDate = null; // 'YYYY-MM-DD'
+
+    // DOM
+    const toc = $('#toc');
+    const count = $('#count');
+    const doc = $('#doc');
+    const sheet = $('#sheet');
+    const sheetTitle = $('#sheet-title');
+    const dTitle = $('#d-title');
+    const dContent = $('#d-content');
+    const sheetMsg = $('#sheet-msg');
+    const searchInput = $('#search');
+
+    const prevBtn = $('#prevPage');
+    const nextBtn = $('#nextPage');
+    const pageNo = $('#pageNo');
+
+    const deleteSheet = $('#delete-sheet');
+    const deleteText = $('#delete-text');
+    const deleteMsg = $('#delete-msg');
+    const deleteConfirm = $('#delete-confirm');
+    const deleteCancel = $('#delete-cancel');
+    const deleteClose = $('#delete-close');
+    let deleteTargetId = null;
+
+    const calPanel = $('#calendar-panel');
+    const calToggle = $('#calendar-toggle');
+    const calTitle = $('#cal-title');
+    const calGrid = $('#cal-grid');
+    const calPrev = $('#cal-prev');
+    const calNext = $('#cal-next');
+    const calFoot = $('#cal-foot');
+    const calClose = $('#cal-close');
+    const calOverlay = $('#calendar-overlay');
+
+    // 열고 닫기
+    function openSheet(mode='create', diary=null){
+      current.mode = mode;
+      sheetMsg.textContent = '';
+      if(mode==='edit' && diary){
+        current.id = diary.id;
+        dTitle.value = diary.title || '';
+        dContent.value = diary.content || '';
+        sheetTitle.textContent = '일기 수정';
+      }else{
+        current.id = null;
+        dTitle.value = '';
+        dContent.value = '';
+        sheetTitle.textContent = '새 일기';
+      }
+      sheet.classList.add('open');
+    }
+    function closeSheet(){ sheet.classList.remove('open'); }
+
+    function openDeleteSheet(id, title){
+      deleteTargetId = id;
+      deleteMsg.textContent = '';
+      deleteText.textContent = `“${title || '제목 없음'}” 이거 진짜 지울까? 되돌릴 수 없어.`;
+      deleteSheet.classList.add('open');
+    }
+    function closeDeleteSheet(){
+      deleteSheet.classList.remove('open');
+      deleteTargetId = null;
+    }
+
+    // 📅 달력 열기/닫기
+    function openCalendar(){
+      calPanel.classList.add('open');
+      calOverlay.classList.add('show');
+      calToggle.textContent = '← 달력 넣기';
+    }
+    function closeCalendar(){
+      calPanel.classList.remove('open');
+      calOverlay.classList.remove('show');
+      calToggle.textContent = '달력 꺼내기 →';
+    }
+
+    calToggle.addEventListener('click', ()=>{
+      if(calPanel.classList.contains('open')) closeCalendar();
+      else openCalendar();
+    });
+    calClose.addEventListener('click', closeCalendar);
+    calOverlay.addEventListener('click', closeCalendar);
+
+    // ===== 목록 로드 =====
+    async function loadList(){
+      const res = await fetch('/diaries/', { headers: authHeaders() });
+      const data = await res.json();
+      if(!res.ok){
+        toc.innerHTML = `<li class="empty">목록 실패: ${data?.detail||res.status}</li>`;
+        return;
+      }
+      // 최신 먼저
+      data.sort((a,b)=>{
+        const at = a.updated_at || a.created_at || '';
+        const bt = b.updated_at || b.created_at || '';
+        return new Date(bt) - new Date(at);
+      });
+
+      cacheList = data;
+      // 현재 필터(검색+날짜) 다시 적용
+      applyFilter({ text: searchInput.value.trim().toLowerCase(), date: selectedDate });
+
+      // 달력 다시 페인트
+      paintCalendar(calYear, calMonth);
+    }
+
+    // ===== 필터 공통 적용 =====
+    function applyFilter({text, date}){
+      const q = (text || '').toLowerCase();
+      filtered = cacheList.filter(d=>{
+        // 날짜 필터
+        if(date){
+          const dayStr = toDateOnly(d.updated_at || d.created_at);
+          if(dayStr !== date) return false;
+        }
+        if(!q) return true;
+        const t = (d.title || '').toLowerCase();
+        const c = (d.content || '').toLowerCase();
+        return t.includes(q) || c.includes(q);
+      });
+
+      count.textContent = `(${filtered.length})`;
+      page = 1;
+      totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+      renderListPage();
+      updatePager();
+    }
+
+    // ===== 목록 렌더 =====
+    function renderListPage(){
+      toc.innerHTML = '';
+      if(filtered.length === 0){
+        toc.innerHTML = `<li class="empty">해당되는 일기는 없어...</li>`;
+        return;
+      }
+      const start = (page - 1) * pageSize;
+      const end = Math.min(start + pageSize, filtered.length);
+      const slice = filtered.slice(start, end);
+      for(const d of slice){
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="title-line">${escapeHtml(d.title || '(제목 없음)')}</div>
+          <div class="meta">${formatDate(d.updated_at || d.created_at)}</div>
+        `;
+        li.addEventListener('click', ()=> showDetail(d.id));
+        toc.appendChild(li);
+      }
+    }
+
+    // ===== 페이지 UI =====
+    function updatePager(){
+      pageNo.textContent = `${page} / ${totalPages}`;
+      prevBtn.setAttribute('aria-disabled', page <= 1 ? 'true' : 'false');
+      nextBtn.setAttribute('aria-disabled', page >= totalPages ? 'true' : 'false');
+    }
+    prevBtn.addEventListener('click', ()=>{
+      if(page > 1){
+        page--;
+        renderListPage();
+        updatePager();
+      }
+    });
+    nextBtn.addEventListener('click', ()=>{
+      if(page < totalPages){
+        page++;
+        renderListPage();
+        updatePager();
+      }
+    });
+
+    // ===== 검색 =====
+    searchInput.addEventListener('input', ()=>{
+      applyFilter({ text: searchInput.value.trim().toLowerCase(), date: selectedDate });
+    });
+
+    // ===== 상세 =====
+    async function showDetail(id){
+      const res = await fetch(`/diaries/${id}`, { headers: authHeaders() });
+      const d = await res.json();
+      if(!res.ok){
+        doc.innerHTML = `<p class="empty">불러오기 실패: ${d?.detail||res.status}</p>`;
+        return;
+      }
+      const dateStr = formatDate(d.updated_at || d.created_at);
+      doc.innerHTML = `
+        <div class="id-badge">#${d.id}</div>
+        <h3>${escapeHtml(d.title || '(제목 없음)')}</h3>
+        <div class="meta">${dateStr}</div>
+        <div class="content" style="margin-top:8px">${escapeHtml(d.content||'')}</div>
+        <div class="actions">
+          <span class="link" id="act-edit">수정</span>
+          <span class="link danger" id="act-del">삭제</span>
+        </div>
+      `;
+      $('#act-edit').addEventListener('click', ()=> openSheet('edit', d));
+      $('#act-del').addEventListener('click', ()=> openDeleteSheet(d.id, d.title));
+    }
+
+    // ===== 저장 =====
+    async function onSave(){
+      const payload = { title: dTitle.value.trim(), content: dContent.value.trim() };
+      if(!payload.title || !payload.content){
+        sheetMsg.textContent = '제목과 내용을 모두 써줘!';
+        sheetMsg.className = 'msg error';
+        return;
+      }
+      try{
+        let res, data;
+        if(current.mode==='edit' && current.id){
+          res = await fetch(`/diaries/${current.id}`, { method:'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
+        }else{
+          res = await fetch('/diaries/', { method:'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+        }
+        data = await res.json();
+        if(!res.ok) throw new Error(data?.detail || '저장 실패');
+
+        sheetMsg.textContent = '저장 완료!';
+        sheetMsg.className = 'msg success';
+        setTimeout(()=>{ closeSheet(); loadList(); showDetail(data.id); }, 300);
+      }catch(err){
+        sheetMsg.textContent = err.message;
+        sheetMsg.className = 'msg error';
+      }
+    }
+
+    // 🧨 실제 삭제
+    deleteConfirm.addEventListener('click', async ()=>{
+      if(!deleteTargetId) return;
+      try{
+        const res = await fetch(`/diaries/${deleteTargetId}`, { method:'DELETE', headers: authHeaders() });
+        if(res.status === 204){
+          deleteMsg.textContent = '찢어버렸땃.';
+          deleteMsg.className = 'msg success';
+          setTimeout(()=>{
+            closeDeleteSheet();
+            doc.innerHTML = `<h3 class="empty">삭제했어!</h3><p class="subtitle">다른 일기를 골라봐.</p>`;
+            loadList();
+          }, 250);
+        }else{
+          const data = await res.json().catch(()=>({}));
+          deleteMsg.textContent = `삭제 실패: ${data?.detail || res.status}`;
+          deleteMsg.className = 'msg error';
+        }
+      }catch(e){
+        deleteMsg.textContent = '서버와 연결이 끊긴 것 같아...';
+        deleteMsg.className = 'msg error';
+      }
+    });
+    deleteCancel.addEventListener('click', closeDeleteSheet);
+    deleteClose.addEventListener('click', closeDeleteSheet);
+
+    // ===== 달력 =====
+    calPrev.addEventListener('click', ()=>{
+      calMonth--;
+      if(calMonth < 0){ calMonth = 11; calYear--; }
+      paintCalendar(calYear, calMonth);
+    });
+    calNext.addEventListener('click', ()=>{
+      calMonth++;
+      if(calMonth > 11){ calMonth = 0; calYear++; }
+      paintCalendar(calYear, calMonth);
+    });
+
+    function paintCalendar(y, m){
+      if(!y || m===undefined){
+        const now = new Date();
+        y = now.getFullYear();
+        m = now.getMonth();
+      }
+      calYear = y; calMonth = m;
+
+      calTitle.textContent = `${y}-${String(m+1).padStart(2,'0')}`;
+
+      // 해당 달에 글 있는 날짜
+      const hasSet = new Set();
+      cacheList.forEach(d=>{
+        const dayStr = toDateOnly(d.updated_at || d.created_at);
+        if(!dayStr) return;
+        const [yy,mm,dd] = dayStr.split('-').map(Number);
+        if(yy===y && mm===(m+1)) hasSet.add(dd);
+      });
+
+      calGrid.innerHTML = '';
+      const dows = ['일','월','화','수','목','금','토'];
+      dows.forEach(d=>{
+        const el = document.createElement('div');
+        el.textContent = d;
+        el.className = 'cal-dow';
+        calGrid.appendChild(el);
+      });
+
+      const first = new Date(y,m,1).getDay();
+      const lastDate = new Date(y, m+1, 0).getDate();
+      for(let i=0; i<first; i++){
+        calGrid.appendChild(document.createElement('div'));
+      }
+
+      for(let d=1; d<=lastDate; d++){
+        const el = document.createElement('div');
+        el.textContent = d;
+        el.className = 'cal-day';
+        if(hasSet.has(d)) el.classList.add('has');
+
+        const dayStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        if(selectedDate === dayStr) el.classList.add('selected');
+
+        el.addEventListener('click', ()=>{
+          if(selectedDate === dayStr){
+            // 다시 누르면 해제
+            selectedDate = null;
+            calFoot.firstElementChild.textContent = '날짜를 고르면 그날 일기만!';
+          }else{
+            selectedDate = dayStr;
+            calFoot.firstElementChild.textContent = `${dayStr} 일기만 보여주는 중`;
+          }
+          applyFilter({ text: searchInput.value.trim().toLowerCase(), date: selectedDate });
+          paintCalendar(calYear, calMonth);
+        });
+
+        calGrid.appendChild(el);
+      }
+    }
+
+    // ===== 헬퍼 =====
+    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,(m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+    function formatDate(x){ try{ return new Date(x).toLocaleString(); }catch{return x||'';} }
+    function toDateOnly(x){
+      if(!x) return null;
+      const d = new Date(x);
+      if(isNaN(d)) return null;
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+
+    // 이벤트
+    $('#link-new').addEventListener('click', ()=> openSheet('create'));
+    $('#link-refresh').addEventListener('click', loadList);
+    $('#link-logout').addEventListener('click', ()=>{
+      localStorage.removeItem('access_token');
+      location.href='/auth';
+    });
+    $('#sheet-close').addEventListener('click', closeSheet);
+    $('#sheet-cancel').addEventListener('click', closeSheet);
+    $('#sheet-save').addEventListener('click', onSave);
+
+    [dTitle,dContent].forEach(el=>{
+      el.addEventListener('keydown', e=>{
+        if(e.key==='Enter' && (e.metaKey||e.ctrlKey)) onSave();
+      });
+    });
+
+    (async ()=>{
+      const ok = await ensureAuth();
+      if(ok){
+        const now = new Date();
+        paintCalendar(now.getFullYear(), now.getMonth());
+        await loadList();
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quote Diary — 로그인</title>
+
+  <!-- 손글씨/낙서 느낌 폰트 (원하면 로컬 폰트로 교체 가능) -->
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Patrick+Hand&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --paper: #f4ecd8;            /* 베이지 종이색 */
+      --ink: #2b2b2b;              /* 연필먹색 */
+      --pencil-line: #8f8f8f;
+      --accent: #c08f5a;           /* 마스킹테이프 색 */
+      --red: #c03a2b;
+      --green: #1c7c54;
+      --shadow: rgba(0,0,0,.12);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(ellipse at 20% 10%, rgba(0,0,0,.03), transparent 60%),
+        radial-gradient(ellipse at 80% 90%, rgba(0,0,0,.04), transparent 60%),
+        #e7e2d8;
+      font-family: "Patrick Hand","Nanum Pen Script", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--ink);
+      letter-spacing:.2px;
+    }
+
+    /* 📓 다이어리 커버 */
+    .cover{
+      min-height:100%;
+      display:grid;
+      place-items:center;
+      padding:40px 20px;
+    }
+    .diary{
+      position:relative;
+      width:min(900px, 92vw);
+      background: #c5b59f;
+      border-radius: 20px;
+      box-shadow:
+        inset 0 0 0 2px rgba(0,0,0,.05),
+        0 14px 40px var(--shadow);
+      padding: clamp(16px, 3vw, 28px);
+      overflow:hidden;
+    }
+
+    /* 📎 스파이럴 바인딩 */
+    .spiral{
+      position:absolute; left:28px; top:0; bottom:0; width:26px;
+      background:
+        repeating-linear-gradient(#2a2a2a 0 10px, #555 10px 20px);
+      box-shadow: inset -3px 0 0 rgba(255,255,255,.2);
+      border-right: 2px solid rgba(0,0,0,.2);
+    }
+
+    /* 📄 다이어리 페이지(줄 있는 종이) */
+    .page{
+      position:relative;
+      margin-left:60px;
+      background:
+        linear-gradient(0deg, transparent 23px, var(--pencil-line) 24px, transparent 25px),
+        linear-gradient(0deg, transparent 48px, var(--pencil-line) 49px, transparent 50px),
+        repeating-linear-gradient(#0000, #0000 28px, rgba(0,0,0,.06) 29px, #0000 30px),
+        var(--paper);
+      background-size: 100% 30px, 100% 30px, 100% 30px, auto;
+      border-radius: 14px;
+      min-height: 560px;
+      box-shadow:
+        inset 0 0 0 1px rgba(0,0,0,.08),
+        0 10px 28px var(--shadow);
+      padding: clamp(22px, 3vw, 36px);
+    }
+
+    /* 찢긴 종이 느낌: 아래 가장자리 */
+    .page::after{
+      content:"";
+      position:absolute; left:0; right:0; bottom:-1px; height:26px;
+      background:
+        radial-gradient(circle at 10% 90%, #0000 12px, rgba(0,0,0,.07) 13px, #0000 14px) left/120px 24px repeat-x,
+        radial-gradient(circle at 30% 40%, #0000 10px, rgba(0,0,0,.06) 11px, #0000 12px) left/140px 24px repeat-x,
+        linear-gradient(var(--paper), var(--paper));
+      clip-path: polygon(0 0,100% 0,100% 100%,0 100%);
+      transform: translateY(2px);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    /* 마스킹 테이프 */
+    .tape{
+      position:absolute; top:-12px; right:32px;
+      width:120px; height:32px; background:var(--accent);
+      transform: rotate(6deg);
+      opacity:.8;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.2));
+    }
+    .tape::after{
+      content:"";
+      position:absolute; inset:0;
+      background: repeating-linear-gradient(45deg, rgba(255,255,255,.22) 0 6px, #0000 6px 12px);
+      mix-blend-mode: overlay;
+    }
+
+    /* 헤더 낙서 */
+    .title{
+      display:flex; align-items:center; gap:12px;
+      font-size: clamp(28px, 4vw, 40px);
+      margin: 4px 0 22px;
+    }
+    .title .heart{ color:var(--red); transform: rotate(-8deg) translateY(-2px); }
+    .subtitle{ color:#666; font-size: clamp(14px, 1.8vw, 16px); margin-bottom: 22px; }
+
+    /* 로그인 폼(왼쪽) + 오른쪽 낙서 박스 */
+    .grid{
+      display:grid; gap:24px;
+      grid-template-columns: 1.1fr .9fr;
+    }
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: rgba(255,255,255,.5);
+      border: 2px dashed rgba(0,0,0,.15);
+      border-radius: 12px;
+      padding: 18px 18px 22px;
+      backdrop-filter: blur(2px);
+      position:relative;
+    }
+
+    .label{
+      font-size:18px; margin:14px 6px 6px; display:block;
+    }
+    .input{
+      width:100%; padding:12px 14px;
+      border:1.8px solid rgba(0,0,0,.25);
+      background:#fffef7; border-radius:10px;
+      font-size:18px; outline:none;
+      box-shadow: inset 0 2px 0 rgba(0,0,0,.05);
+    }
+    .input:focus{
+      border-color:#2f4f4f;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.06), inset 0 2px 0 rgba(0,0,0,.05);
+    }
+
+    /* 낙서풍 버튼 */
+    .btn{
+      margin-top:16px; width:100%;
+      border:2px solid #111; background:#111; color:#fff;
+      padding:12px 14px; border-radius:12px;
+      font-weight:700; cursor:pointer; font-size:18px;
+      box-shadow: 0 4px 0 #000;
+      transform: translateY(0); transition: .08s;
+    }
+    .btn:hover{ filter: brightness(1.05); }
+    .btn:active{ box-shadow: 0 2px 0 #000; transform: translateY(2px); }
+    .btn-ghost{
+      background: #fffef7; color:#111; border-style:dashed; box-shadow:none;
+    }
+
+    .row{ display:flex; gap:10px; align-items:center; }
+    .muted{ color:#666; font-size:14px; }
+
+    .scribbles{
+      font-family:"Nanum Pen Script","Patrick Hand", cursive;
+      font-size:20px; line-height:1.35;
+      color:#333;
+    }
+    .scribbles ul{ margin:8px 0 0 18px; padding:0 }
+    .scribbles li{ margin:6px 0 }
+
+    /* ✅ 메시지 */
+    .msg{ margin-top:10px; font-size:16px; min-height:22px }
+    .success{ color:var(--green) }
+    .error{ color:var(--red) }
+
+    /* ✂️ 뜯긴 종이 회원가입 시트 */
+    .sheet{
+      position: fixed; left:50%; bottom:-80%;
+      transform: translateX(-50%) rotate(-1.2deg);
+      width: min(720px, 92vw);
+      background: #fffdf6;
+      border-radius: 14px;
+      box-shadow: 0 22px 60px rgba(0,0,0,.28);
+      border: 2px solid rgba(0,0,0,.12);
+      padding: 20px 22px 28px;
+      transition: bottom .55s cubic-bezier(.2,.9,.15,1), transform .5s;
+      z-index: 30;
+    }
+    .sheet.open{
+      bottom: 7%;
+      transform: translateX(-50%) rotate(0deg);
+    }
+    /* 윗부분 찢김 */
+    .sheet::before{
+      content:"";
+      position:absolute; left:0; right:0; top:-1px; height:28px;
+      background:
+        radial-gradient(circle at 8% 20%, #0000 10px, rgba(0,0,0,.08) 11px, #0000 12px) left/140px 26px repeat-x,
+        radial-gradient(circle at 28% 70%, #0000 8px, rgba(0,0,0,.06) 9px, #0000 10px) left/120px 26px repeat-x,
+        linear-gradient(#fffdf6,#fffdf6);
+      pointer-events:none;
+    }
+    .sheet h3{
+      margin:2px 0 6px; font-size:28px;
+    }
+    .sheet .close{
+      position:absolute; top:10px; right:10px; background:#fff; border:2px solid #111;
+      border-radius:10px; padding:6px 10px; cursor:pointer; font-weight:700; box-shadow:0 2px 0 #000;
+    }
+    .sheet .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+    @media (max-width:720px){ .sheet .grid2{ grid-template-columns: 1fr; } }
+
+    /* 연필 커서 느낌 */
+    input, button{ font-family: inherit; }
+    ::selection{ background:#ffe3a1 }
+
+    /* 작은 연필 아이콘 */
+    .pencil{
+      width:18px; height:18px; border:2px solid #111; border-radius:2px;
+      background: linear-gradient(90deg,#f6d365 0 40%, #111 40% 60%, #eb5757 60% 100%);
+      display:inline-block; transform: rotate(-18deg);
+      margin-right:8px;
+    }
+
+    /* 링크 낙서 */
+    .link{
+      appearance:none; background:none; border:none;
+      color:#0a4b5c; text-decoration: underline; cursor:pointer; padding:0 2px;
+      font-size:18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <div class="diary">
+      <div class="spiral"></div>
+      <div class="tape"></div>
+
+      <div class="page">
+        <div class="title">
+          <span class="pencil"></span>
+          <span>Quote Diary</span>
+          <span class="heart">♥</span>
+        </div>
+        <div class="subtitle">기억하고 싶은 문장을 손글씨로 남기는 곳</div>
+
+        <div class="grid">
+          <!-- 👈 로그인 카드 -->
+          <div class="card">
+            <label class="label" for="username">아이디</label>
+            <input id="username" class="input" type="text" placeholder="ex) ram123" autocomplete="username" />
+
+            <label class="label" for="password">비밀번호</label>
+            <input id="password" class="input" type="password" placeholder="••••••••" autocomplete="current-password" />
+
+            <button id="login-btn" class="btn">로그인</button>
+
+            <div class="msg" id="msg"></div>
+
+            <div class="row" style="margin-top:10px;">
+              <span class="muted">계정 만들기</span>
+              <button class="link" id="open-register">회원가입</button>
+            </div>
+          </div>
+
+          <!-- 👉 낙서/메모 카드 -->
+          <div class="card scribbles">
+            <div style="font-size:22px;margin-bottom:6px;">오늘의 메모</div>
+            <ul>
+              <li>오늘의 명언이 마음을 움직이면, 적자.</li>
+              <li>적지 않으면 사라진다.</li>
+              <li>사소한 문장도 내일의 나를 만든다.</li>
+            </ul>
+            <div style="margin-top:16px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✂️ 뜯긴 종이 회원가입 시트 -->
+  <section class="sheet" id="sheet">
+    <button class="close" id="close-sheet">닫기</button>
+    <h3>새 계정 만들기</h3>
+    <div class="muted" style="margin-bottom:8px">낙서하듯 가볍게 써도 괜찮아. 나중에 언제든 바꿀 수 있어.</div>
+    <div class="grid2">
+      <div>
+        <label class="label" for="r-username">아이디</label>
+        <input id="r-username" class="input" type="text" placeholder="아이디" autocomplete="username" />
+      </div>
+      <div>
+        <label class="label" for="r-email">이메일</label>
+        <input id="r-email" class="input" type="email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div>
+        <label class="label" for="r-password">비밀번호</label>
+        <input id="r-password" class="input" type="password" placeholder="비밀번호" autocomplete="new-password" />
+      </div>
+      <div>
+        <label class="label" for="r-password2">비밀번호 확인</label>
+        <input id="r-password2" class="input" type="password" placeholder="다시 한번" autocomplete="new-password" />
+      </div>
+    </div>
+
+    <button id="register-btn" class="btn" style="margin-top:16px">회원가입 완료</button>
+    <button class="btn btn-ghost" id="goto-login" style="margin-top:10px">로그인으로 돌아가기</button>
+    <div class="msg" id="msg-register"></div>
+  </section>
+
+  <script>
+    const $ = (s)=>document.querySelector(s);
+    const msg = $('#msg');
+    const msgR = $('#msg-register');
+    const sheet = $('#sheet');
+
+    // 로그인
+    $('#login-btn').addEventListener('click', async ()=>{
+      msg.textContent = '';
+      const username = $('#username').value.trim();
+      const password = $('#password').value;
+
+      if(!username || !password){
+        msg.textContent = '아이디와 비밀번호를 적어줘!';
+        msg.className = 'msg error';
+        return;
+      }
+      try{
+        const res = await fetch('/auth/login',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({username,password})
+        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data?.detail || '로그인 실패');
+
+        // 백엔드에서 반환하는 키 이름 맞춰서 저장 (둘 다 케이스 처리)
+        const token = data.access_token || data.token;
+        if(token) localStorage.setItem('access_token', token);
+
+        msg.textContent = '로그인 성공! 잠깐만~ 홈으로 가는 중...';
+        msg.className = 'msg success';
+        setTimeout(()=> location.href='/diaries/page', 650);
+      }catch(err){
+        msg.textContent = err.message;
+        msg.className = 'msg error';
+      }
+    });
+
+    // 시트 열기/닫기
+    $('#open-register').addEventListener('click', ()=> sheet.classList.add('open'));
+    $('#close-sheet').addEventListener('click', ()=> sheet.classList.remove('open'));
+    $('#goto-login').addEventListener('click', ()=> sheet.classList.remove('open'));
+
+    // 회원가입
+    $('#register-btn').addEventListener('click', async ()=>{
+      msgR.textContent = '';
+      const username = $('#r-username').value.trim();
+      const email = $('#r-email').value.trim();
+      const password = $('#r-password').value;
+      const password2 = $('#r-password2').value;
+
+      if(!username || !email || !password){
+        msgR.textContent = '모든 항목을 채워줘!';
+        msgR.className = 'msg error';
+        return;
+      }
+      if(password !== password2){
+        msgR.textContent = '비밀번호가 서로 달라!';
+        msgR.className = 'msg error';
+        return;
+      }
+      try{
+        const res = await fetch('/auth/register',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({username, email, password})
+        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data?.detail || '회원가입 실패');
+
+        msgR.textContent = '회원가입 완료! 이제 로그인해보자 땃 🙌';
+        msgR.className = 'msg success';
+        setTimeout(()=> sheet.classList.remove('open'), 700);
+      }catch(err){
+        msgR.textContent = err.message;
+        msgR.className = 'msg error';
+      }
+    });
+
+    // Enter로 전송
+    ['#username','#password'].forEach(sel=>{
+      $(sel).addEventListener('keydown', (e)=>{
+        if(e.key==='Enter') $('#login-btn').click();
+      });
+    });
+    ['#r-username','#r-email','#r-password','#r-password2'].forEach(sel=>{
+      $(sel).addEventListener('keydown', (e)=>{
+        if(e.key==='Enter') $('#register-btn').click();
+      });
+    });
+  </script>
+</body>
+</html>
