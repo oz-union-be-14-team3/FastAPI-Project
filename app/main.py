@@ -1,4 +1,4 @@
-from app.api.v1 import auth, diary, question
+from app.api.v1 import auth, diary, question, quote
 from fastapi.responses import PlainTextResponse
 from fastapi import FastAPI
 from app.db.base import db_connection
@@ -16,6 +16,7 @@ db_connection(app)
 app.include_router(question.router)
 app.include_router(auth.router)
 app.include_router(diary.router)
+app.include_router(quote.router)
 
 
 @app.get("/", response_class=PlainTextResponse)
