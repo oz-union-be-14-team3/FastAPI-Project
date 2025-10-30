@@ -12,7 +12,6 @@ app = FastAPI(title="Diary CRUD API")
 
 db_connection(app)
 
-app.include_router(question.router)
 app.include_router(auth.router)
 app.include_router(diary.router)
 app.include_router(question.router)
