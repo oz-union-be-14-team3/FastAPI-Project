@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import requests
 
 class QustionsScraper:
+    
     def __init__(self, url:str):
         self.url = url
     
