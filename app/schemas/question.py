@@ -12,6 +12,9 @@ class QuestionCreate(QuestionBase):
 
 
 class QuestionResponse(QuestionBase):
+    """
+    유저에게 랜덤 질문 생성.
+    """
     id: int
 
     class Config:
@@ -23,11 +26,17 @@ class UserQuestionBase(BaseModel):
 
 
 class UserQuestionCreate(UserQuestionBase):
+    """
+    유저가 질문을 받을 시.
+    """
     user_id: int
     question_id: int
 
 
 class UserQuestionResponse(UserQuestionBase):
+    """
+    
+    """
     id: int
     user_id: int
     question_id: int

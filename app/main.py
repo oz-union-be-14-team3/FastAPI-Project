@@ -1,5 +1,5 @@
 from app.api.v1 import auth, diary, question
-from fastapi.responses import RedirectResponse
+from fastapi.responses import PlainTextResponse
 from fastapi import FastAPI
 from app.db.base import db_connection
 from app.scraping.question_scraper import QustionsScraper
@@ -18,9 +18,9 @@ app.include_router(auth.router)
 app.include_router(diary.router)
 
 
-@app.get("/", response_class=RedirectResponse)
+@app.get("/", response_class=PlainTextResponse)
 async def root():
-    return RedirectResponse(url="/auth")
+    return "Hello, world!"
 
 @app.on_event("startup")
 async def init_questions():

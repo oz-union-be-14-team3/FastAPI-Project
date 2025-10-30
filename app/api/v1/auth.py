@@ -1,5 +1,4 @@
-from fastapi import APIRouter,Depends, Request
-from fastapi.templating import Jinja2Templates
+from fastapi import APIRouter,Depends
 from app.schemas.user import UserCreate, UserLogin, UserResponse
 from app.services.auth_service import AuthService
 from fastapi.security import HTTPAuthorizationCredentials
@@ -7,11 +6,7 @@ from app.core.dependencies import oauth2_scheme,get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-template = Jinja2Templates("app/templates")
 
-@router.get("/")
-async def read_auth(request: Request):
-    return template.TemplateResponse("auth.html", {"request": request})
 
 
 @router.post("/register", response_model=UserResponse)

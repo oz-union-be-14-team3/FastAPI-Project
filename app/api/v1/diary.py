@@ -1,6 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends, status, Request
-from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from app.schemas.diary import DiaryCreate, DiaryUpdate, DiaryOut
 from app.repositories.diary_repo import DiaryRepository
@@ -8,17 +6,7 @@ from app.models.user import User
 from app.core.dependencies import get_current_user
 
 router = APIRouter(prefix="/diaries", tags=["Diary CRUD"])
-templates = Jinja2Templates(directory="app/templates")
 
-# /diaries → /diaries/page 로 리다이렉트
-@router.get("", include_in_schema=False)
-async def diaries_root_redirect():
-    return RedirectResponse(url="/diaries/page", status_code=307)
-
-# 다이어리 페이지 (HTML)
-@router.get("/page", response_class=HTMLResponse, tags=["Diary Page"])
-async def diary_page(request: Request):
-    return templates.TemplateResponse("diaries.html", {"request": request})
 
 # [1] 내 모든 일기 조회
 @router.get("/", response_model=list[DiaryOut])
