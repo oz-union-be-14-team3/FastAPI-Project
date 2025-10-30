@@ -1,10 +1,7 @@
 from fastapi import FastAPI
 from app.db.base import db_connection
-import uvicorn
-from fastapi import FastAPI
-from tortoise.contrib.fastapi import register_tortoise
 from app.api.v1 import auth, diary
-from app.core.config import settings
+import uvicorn
 
 app = FastAPI(title="FastAPI Mini Project")
 db_connection(app)
