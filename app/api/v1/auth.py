@@ -1,12 +1,20 @@
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter,Depends, Request
+from fastapi.responses import HTMLResponse
+from pathlib import Path
 from app.schemas.user import UserCreate, UserLogin, UserResponse
 from app.services.auth_service import AuthService
 from fastapi.security import HTTPAuthorizationCredentials
 from app.core.dependencies import oauth2_scheme,get_current_user
+from fastapi.templating import Jinja2Templates
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
+templates = Jinja2Templates(directory="app/templates")
 
+
+@router.get("/", response_class=HTMLResponse, summary="다이어리 로그인 페이지")
+async def read_page(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @router.post("/register", response_model=UserResponse, summary="회원가입")

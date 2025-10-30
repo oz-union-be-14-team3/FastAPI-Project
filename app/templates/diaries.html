@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quote Diary — 두 페이지 다이어리</title>
+  <style>
+    :root{
+      --paper:#faf7ef; --paper2:#fffdf7; --line:#d6d0c6; --ink:#2b2b2b;
+      --muted:#6b6b6b; --shadow:rgba(0,0,0,.12); --accent:#0a4b5c;
+      --red:#b83a3a; --green:#1c7c54; --pin:#b64e37; --note:#fff6a9;
+      --danger:#d54d4d;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:#e9e3d8; color:var(--ink);
+      font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Pretendard, Apple SD Gothic Neo, sans-serif;
+      letter-spacing:.1px;
+    }
+
+    .wrap{min-height:100%; display:grid; place-items:center; padding:32px 16px}
+    .book{
+      position:relative; width:min(1120px,96vw); background:#d7c9b6; border-radius:18px;
+      box-shadow:inset 0 0 0 2px rgba(0,0,0,.05), 0 22px 50px var(--shadow);
+      padding:18px;
+    }
+    .spine{
+      position:absolute; top:0; bottom:0; left:50%; width:20px; transform:translateX(-50%);
+      background:repeating-linear-gradient(#2a2a2a 0 12px,#565656 12px 24px);
+      border-left:2px solid rgba(255,255,255,.25); border-right:2px solid rgba(0,0,0,.25);
+      z-index:2;
+    }
+
+    .spread{
+      display:grid; grid-template-columns:1fr 1fr; gap:0; position:relative; z-index:1;
+      border-radius:14px;
+    }
+    .page{
+      background:
+        repeating-linear-gradient(#0000,#0000 28px, rgba(0,0,0,.06) 29px, #0000 30px),
+        var(--paper);
+      padding:26px 24px 28px;
+      min-height:620px;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
+      position:relative;
+    }
+    .left{
+      background:
+        repeating-linear-gradient(#0000,#0000 28px, rgba(0,0,0,.06) 29px, #0000 30px),
+        var(--paper2);
+      border-right:1.5px dashed rgba(0,0,0,.15);
+      overflow:hidden;
+    }
+    .right{
+      background:
+        repeating-linear-gradient(#0000,#0000 28px, rgba(0,0,0,.06) 29px, #0000 30px),
+        var(--paper);
+      border-left:1.5px dashed rgba(0,0,0,.15);
+    }
+
+    .holes{
+      position:absolute; left:10px; top:46px; display:flex; flex-direction:column; gap:110px;
+    }
+    .holes span{
+      width:10px; height:10px; border-radius:50%; background:#2a2a2a;
+      box-shadow:0 1px 0 rgba(255,255,255,.4) inset; opacity:.65;
+    }
+
+    /* 왼쪽 헤더 */
+    .head{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin:0 0 8px;
+    }
+    .head-left{display:flex; gap:10px; align-items:center;}
+    .head h2{ margin:0; font-size:22px; letter-spacing:.2px }
+    .toolbar{ color:var(--muted); font-size:14px; display:flex; align-items:center; gap:10px }
+    .toolbar .link{ all:unset; color:var(--accent); cursor:pointer; text-decoration:underline }
+    .toolbar .logout{ all:unset; color:var(--red); cursor:pointer; text-decoration:underline; }
+    .search-box input{
+      border:1px solid rgba(0,0,0,.15);
+      border-radius:999px;
+      padding:5px 10px;
+      font-size:13px;
+      background:#fffefb;
+      width:140px;
+    }
+
+    /* 목록 */
+    .list{
+      display:grid; grid-template-columns: 1.3fr .9fr; gap:8px 12px;
+      align-items:start; font-size:15px; line-height:1.35;
+      max-height:calc(100% - 140px); overflow:auto; padding-right:4px;
+    }
+    .list .th{ color:#5a5a5a; font-weight:700; position:sticky; top:0; background:linear-gradient(#fffefb,#fffefb);
+               padding:4px 0; border-bottom:1px dashed #bbb; }
+    .row{ cursor:pointer; padding:6px 4px; border-radius:6px; display:flex; align-items:center; gap:6px; }
+    .row:hover{ background:rgba(0,0,0,.05) }
+    .muted{ color:var(--muted) }
+
+    /* 포스트잇 있는 다이어리 표시 */
+    .row.has-note-title{ color:var(--danger); font-weight:600; }
+    .row .badge{
+      display:inline-block;
+      background:rgba(213,77,77,.14);
+      color:var(--danger);
+      font-size:11px;
+      padding:2px 5px;
+      border-radius:6px;
+    }
+    .row .toggle-note{
+      font-size:11px;
+      color:#0a4b5c;
+      text-decoration:underline;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    /* 네비 */
+    .nav-wrap{
+      position:absolute; left:18px; right:18px; bottom:10px; display:flex; justify-content:space-between; align-items:center;
+      font-family: "Nanum Pen Script", cursive; font-size:18px;
+    }
+    .scribble{ all:unset; cursor:pointer; text-decoration:underline; color:#0a4b5c; padding:2px 6px }
+    .page-no{ color:#666; font-size:16px }
+
+    /* 오른쪽 문서 */
+    .doc h3{ margin:0 0 4px; font-size:24px; display:flex; align-items:center; gap:8px }
+    .date{ color:var(--muted); font-size:14px; margin-bottom:8px; text-align:right }
+    .content{
+      white-space:pre-wrap; line-height:1.6; font-size:17px; min-height:160px;
+      border:1px solid rgba(0,0,0,.03); border-radius:10px; padding:10px 12px;
+      background:rgba(255,255,255,.45);
+    }
+    .doc-actions{
+      display:flex; gap:8px; margin:6px 0 12px;
+    }
+    .btn-sm{
+      border:none; border-radius:6px; padding:5px 10px;
+      background:#0a4b5c; color:white; cursor:pointer; font-size:13px;
+    }
+    .btn-danger{
+      background:#c43b3b; color:#fff;
+    }
+
+    /* 오른쪽 포스트잇 */
+    .note{
+      position:absolute; right:18px; bottom:18px; width:220px; min-height:140px; padding:14px 14px 36px;
+      background: var(--note);
+      border:1px solid #e4d470; border-radius:8px;
+      box-shadow: 0 10px 18px rgba(0,0,0,.18), inset 0 2px 0 rgba(255,255,255,.4);
+      transform: rotate(1.2deg);
+      user-select:none; touch-action:none; display:none;
+      z-index:20;
+    }
+    .note.show{ display:block }
+    .note.bookmarked{ border:2px solid #d54d4d; box-shadow:0 12px 22px rgba(213,77,77,.35); }
+    .note .pin{
+      position:absolute; width:12px; height:12px; border-radius:50%; background:var(--pin);
+      top:8px; left:8px; box-shadow:0 2px 0 rgba(0,0,0,.25);
+    }
+    .note .txt{ white-space:pre-wrap; line-height:1.35; font-size:14px; color:#3b2b21; }
+    .note .author{ margin-top:6px; font-size:12px; color:#5a4a3d }
+    .note .controls{
+      position:absolute; right:8px; bottom:6px; display:flex; gap:6px; font-size:13px;
+    }
+    .note .btn{ all:unset; cursor:pointer; color:#513b2a; padding:2px 6px; border-radius:6px; background:#f8e98f; border:1px solid #e2d276 }
+    .note .btn:hover{ filter:brightness(1.05) }
+
+    .bookmark-btn{
+      all:unset;
+      position:absolute;
+      top:6px;
+      right:6px;
+      background:white;
+      border:1px solid rgba(0,0,0,.1);
+      border-radius:999px;
+      padding:1px 8px 0;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .bookmark-btn.active{
+      background:#d54d4d;
+      color:white;
+      border-color:#b43737;
+    }
+
+    /* 오른쪽 하단 북마크 리스트 */
+    .bookmark-panel{
+      margin-top:14px;
+      border-top:1px dashed #c9c0b4;
+      padding-top:10px;
+    }
+    .bookmark-panel h4{
+      margin:0 0 8px;
+      font-size:15px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .bookmark-list{
+      max-height:120px;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+      font-size:13px;
+    }
+    .bookmark-item{
+      background:#fffefb;
+      border:1px solid rgba(0,0,0,.03);
+      border-radius:6px;
+      padding:4px 6px;
+      display:flex;
+      justify-content:space-between;
+      gap:6px;
+      align-items:center;
+    }
+    .bookmark-item small{color:#7a6f5a;}
+    .bookmark-remove{
+      all:unset;
+      font-size:12px;
+      color:#d54d4d;
+      cursor:pointer;
+    }
+
+    /* 새 일기 모달 */
+    .floating-form{
+      position:fixed; inset:0; background:rgba(0,0,0,.25); display:none; align-items:center; justify-content:center; z-index:999;
+    }
+    .floating-form .card{
+      background:#fffdf8; border:1px solid rgba(0,0,0,.085); border-radius:12px; width:min(420px, 94vw);
+      padding:16px 16px 14px; box-shadow:0 20px 40px rgba(0,0,0,.28);
+    }
+    .floating-form h3{ margin:0 0 10px; }
+    .floating-form label{ display:block; font-size:13px; margin-bottom:4px; }
+    .floating-form input,
+    .floating-form textarea{
+      width:100%; border:1px solid #d0c5b6; border-radius:8px; padding:8px 10px; font-size:14px; font-family:inherit;
+    }
+    .floating-form textarea{ min-height:120px; resize:vertical; }
+    .floating-form .actions{ margin-top:10px; display:flex; gap:8px; justify-content:flex-end; }
+    .floating-form button{ border:none; border-radius:7px; padding:6px 12px; cursor:pointer; }
+    .floating-form .primary{ background:#0a4b5c; color:white; }
+    .floating-form .ghost{ background:transparent; }
+
+    @media (max-width:860px){
+      .spread{ grid-template-columns:1fr }
+      .right{ border-left:none; border-top:1.5px dashed rgba(0,0,0,.15) }
+      .note{ position:fixed; right:12px; bottom:12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="book">
+    <div class="spine" aria-hidden="true"></div>
+
+    <div class="spread">
+      <!-- 왼쪽 페이지 -->
+      <section class="page left" id="left-page">
+        <div class="holes" aria-hidden="true"><span></span><span></span><span></span></div>
+
+        <div class="head">
+          <div class="head-left">
+            <h2>다이어리</h2>
+            <div class="search-box">
+              <input id="search" type="text" placeholder="검색..." />
+            </div>
+          </div>
+          <div class="toolbar">
+            <span class="link" id="new">새 일기</span>
+            <span class="link" id="refresh">새로고침</span>
+            <span class="logout" id="logout">로그아웃</span>
+          </div>
+        </div>
+
+        <div class="list" id="list">
+          <div class="th">제목</div>
+          <div class="th" style="text-align:right">날짜</div>
+        </div>
+
+        <div class="nav-wrap">
+          <button class="scribble" id="prev">&lt; Prev</button>
+          <span class="page-no" id="pageNo">1 / 1</span>
+          <button class="scribble" id="next">Next &gt;</button>
+        </div>
+      </section>
+
+      <!-- 오른쪽 페이지 -->
+      <section class="page right" id="right-page">
+        <div class="holes" aria-hidden="true" style="left:auto; right:10px;"><span></span><span></span><span></span></div>
+
+        <div class="doc" id="doc">
+          <h3>
+            <span id="doc-title" class="empty">제목</span>
+          </h3>
+          <div class="date" id="doc-date">날짜</div>
+
+          <div class="doc-actions">
+            <button class="btn-sm" id="edit-btn">수정</button>
+            <button class="btn-sm btn-danger" id="delete-btn">삭제</button>
+          </div>
+
+          <div class="content" id="doc-content">왼쪽에서 일기를 고르거나 “새 일기”를 눌러줘 땃.</div>
+
+          <!-- 🔥 북마크 리스트 패널 -->
+          <div class="bookmark-panel" id="bookmark-panel">
+            <h4>북마크한 명언 <small class="muted">(이 기기)</small></h4>
+            <div class="bookmark-list" id="bookmark-list">
+              <div class="empty">아직 북마크한 명언이 없땃.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 오른쪽 포스트잇 -->
+        <div class="note" id="note" aria-label="랜덤 명언 포스트잇">
+          <span class="pin" aria-hidden="true"></span>
+          <button class="bookmark-btn" id="bookmark-btn">♥</button>
+          <div class="txt" id="note-text">여기에 명언이 뜬다땃.</div>
+          <div class="author" id="note-author"></div>
+          <div class="controls">
+            <button class="btn" id="note-shuffle">↻</button>
+            <button class="btn" id="note-close">✕</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+</div>
+
+<!-- 새 일기 / 수정 공용 모달 -->
+<div class="floating-form" id="form-modal" aria-hidden="true">
+  <div class="card">
+    <h3 id="form-title">새 일기</h3>
+    <label for="f-title">제목</label>
+    <input id="f-title" type="text" placeholder="오늘의 문장" />
+    <label for="f-content" style="margin-top:8px;">내용</label>
+    <textarea id="f-content" placeholder="내용을 적는거시땃."></textarea>
+    <div class="actions">
+      <button class="ghost" id="f-cancel">취소</button>
+      <button class="primary" id="f-save">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== 공통 Auth ===== */
+function authHeaders(extra){
+  const token = localStorage.getItem('access_token');
+  return Object.assign({'Content-Type':'application/json'}, token? {'Authorization':'Bearer '+token}:{}, extra||{});
+}
+
+/* ===== 상태 ===== */
+let cache = [];
+let filtered = [];
+const pageSize = 10;
+let page = 1; let total = 1;
+let currentId = null;
+let editingId = null;
+
+/* 포스트잇 관련 (명언) */
+let currentQuoteId = null;
+const localBookmarkKey = 'quote-bookmarks';
+
+/* ===== DOM ===== */
+const list = document.getElementById('list');
+const pageNo = document.getElementById('pageNo');
+const docTitle = document.getElementById('doc-title');
+const docDate = document.getElementById('doc-date');
+const docContent = document.getElementById('doc-content');
+const searchBox = document.getElementById('search');
+
+const formModal = document.getElementById('form-modal');
+const fTitle = document.getElementById('f-title');
+const fContent = document.getElementById('f-content');
+const fSave = document.getElementById('f-save');
+const fCancel = document.getElementById('f-cancel');
+const formTitle = document.getElementById('form-title');
+
+const editBtn = document.getElementById('edit-btn');
+const deleteBtn = document.getElementById('delete-btn');
+const logoutBtn = document.getElementById('logout');
+
+const bookmarkListBox = document.getElementById('bookmark-list');
+
+/* ===== 로그아웃 ===== */
+logoutBtn.addEventListener('click', async ()=>{
+  const token = localStorage.getItem('access_token');
+  if(!token){
+    window.location.href = '/auth';
+    return;
+  }
+  try{
+    await fetch('/auth/logout', {
+      method:'POST',
+      headers: authHeaders()
+    });
+  }catch(e){}
+  localStorage.removeItem('access_token');
+  window.location.href = '/auth';
+});
+
+/* ===== 목록 로드 ===== */
+async function loadList(){
+  let res;
+  try{
+    res = await fetch('/diaries/list', { headers: authHeaders() });
+  }catch(e){
+    list.innerHTML = '<div class="empty">서버에 연결할 수 없땃.</div>';
+    return;
+  }
+
+  if(res.status === 401){
+    window.location.href = '/auth'; return;
+  }
+
+  const data = await res.json().catch(()=>[]);
+  if(!res.ok){
+    list.innerHTML = `<div class="empty">목록 실패: ${data?.detail||res.status}</div>`;
+    return;
+  }
+
+  data.sort((a,b)=>{
+    const at = a.updated_at || a.created_at;
+    const bt = b.updated_at || b.created_at;
+    return new Date(bt) - new Date(at);
+  });
+
+  cache = data;
+  filtered = data.slice();
+  page = 1;
+  total = Math.max(1, Math.ceil(filtered.length / pageSize));
+  renderList();
+  updatePager();
+
+  if(filtered.length > 0){
+    showDetail(filtered[0].id);
+  }else{
+    showEmptyDetail();
+  }
+}
+
+/* ===== 목록 렌더 ===== */
+function renderList(){
+  list.innerHTML = `
+    <div class="th">제목</div>
+    <div class="th" style="text-align:right">날짜</div>
+  `;
+
+  const start = (page-1)*pageSize;
+  const end = Math.min(start+pageSize, filtered.length);
+  for(let i=start;i<end;i++){
+    const d = filtered[i];
+
+    const a = document.createElement('div'); a.className='row';
+    const b = document.createElement('div'); b.className='row'; b.style.textAlign='right';
+
+    const hasNote = hasNoteForDiary(d.id);
+
+    // 제목 쪽 내용
+    if(hasNote){
+      a.classList.add('has-note-title');
+      a.innerHTML = `
+        <span>${d.title || '(제목 없음)'}</span>
+        <span class="badge">포스트잇</span>
+        <span class="toggle-note" data-id="${d.id}">포스트잇끄기</span>
+      `;
+    }else{
+      a.innerHTML = `
+        <span>${d.title || '(제목 없음)'}</span>
+        <span class="toggle-note" data-id="${d.id}">포스트잇</span>
+      `;
+    }
+
+    b.textContent = formatDate(d.updated_at || d.created_at);
+
+    // 제목 클릭 → 상세 열기
+    a.addEventListener('click', ()=> showDetail(d.id));
+    b.addEventListener('click', ()=> showDetail(d.id));
+
+    list.appendChild(a); list.appendChild(b);
+  }
+
+  // 포스트잇 토글 버튼들에 이벤트 붙이기
+  list.querySelectorAll('.toggle-note').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();  // 제목 열기 막기
+      const id = Number(btn.dataset.id);
+      toggleDiaryNote(id);
+    });
+  });
+}
+
+function updatePager(){ pageNo.textContent = `${page} / ${total}`; }
+document.getElementById('prev').onclick = ()=>{ if(page>1){ page--; renderList(); updatePager(); } };
+document.getElementById('next').onclick = ()=>{ if(page<total){ page++; renderList(); updatePager(); } };
+document.getElementById('refresh').onclick = loadList;
+
+/* ===== 검색 ===== */
+searchBox.addEventListener('input', ()=>{
+  const q = searchBox.value.trim().toLowerCase();
+  if(!q){
+    filtered = cache.slice();
+  }else{
+    filtered = cache.filter(d=>{
+      return (d.title && d.title.toLowerCase().includes(q)) ||
+             (d.content && d.content.toLowerCase().includes(q));
+    });
+  }
+  page = 1;
+  total = Math.max(1, Math.ceil(filtered.length / pageSize));
+  renderList();
+  updatePager();
+});
+
+/* ===== 상세 ===== */
+async function showDetail(id){
+  let res;
+  try{
+    res = await fetch(`/diaries/${id}`, { headers: authHeaders() });
+  }catch(e){
+    docTitle.textContent='불러오기 실패';
+    docTitle.classList.remove('empty');
+    return;
+  }
+
+  if(res.status === 401){
+    window.location.href = '/auth'; return;
+  }
+
+  const d = await res.json().catch(()=>null);
+  if(!res.ok || !d){
+    docTitle.textContent='불러오기 실패';
+    docTitle.classList.remove('empty');
+    return;
+  }
+
+  currentId = d.id;
+  docTitle.textContent = d.title || '(제목 없음)';
+  docTitle.classList.remove('empty');
+  docDate.textContent = formatDate(d.updated_at || d.created_at);
+  docContent.textContent = d.content || '';
+
+  restoreNoteForCurrent();
+}
+
+/* 빈 상세 */
+function showEmptyDetail(){
+  currentId = null;
+  docTitle.textContent = '일기 없음';
+  docDate.textContent = '';
+  docContent.textContent = '“새 일기”를 눌러서 하나 작성하는거시땃.';
+  hideNote();
+}
+
+/* ===== 새 일기 모달 ===== */
+document.getElementById('new').addEventListener('click', ()=>{
+  editingId = null;
+  formTitle.textContent = '새 일기';
+  fTitle.value = '';
+  fContent.value = '';
+  formModal.style.display = 'flex';
+  fTitle.focus();
+});
+fCancel.addEventListener('click', ()=>{
+  formModal.style.display = 'none';
+});
+fSave.addEventListener('click', async ()=>{
+  const title = fTitle.value.trim();
+  const content = fContent.value.trim();
+  if(!title){
+    alert('제목은 있어야 하는거시땃.');
+    return;
+  }
+
+  if(!editingId){
+    let res;
+    try{
+      res = await fetch('/diaries/', {
+        method:'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ title, content })
+      });
+    }catch(e){
+      alert('서버 오류'); return;
+    }
+    if(res.status === 401){ window.location.href = '/auth'; return; }
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      alert(err.detail || '작성 실패'); return;
+    }
+  }else{
+    let res;
+    try{
+      res = await fetch(`/diaries/${editingId}`, {
+        method:'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ title, content })
+      });
+    }catch(e){
+      alert('서버 오류'); return;
+    }
+    if(res.status === 401){ window.location.href = '/auth'; return; }
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      alert(err.detail || '수정 실패'); return;
+    }
+  }
+
+  formModal.style.display = 'none';
+  await loadList();
+});
+
+/* ===== 수정 버튼 ===== */
+editBtn.addEventListener('click', ()=>{
+  if(!currentId) return;
+  formTitle.textContent = '일기 수정';
+  fTitle.value = docTitle.textContent === '제목' ? '' : docTitle.textContent;
+  fContent.value = docContent.textContent === '왼쪽에서 일기를 고르거나 “새 일기”를 눌러줘 땃.' ? '' : docContent.textContent;
+  editingId = currentId;
+  formModal.style.display = 'flex';
+  fTitle.focus();
+});
+
+/* ===== 삭제 버튼 ===== */
+deleteBtn.addEventListener('click', async ()=>{
+  if(!currentId) return;
+  if(!confirm('정말 삭제할까 땃?')) return;
+  let res;
+  try{
+    res = await fetch(`/diaries/${currentId}`, {
+      method:'DELETE',
+      headers: authHeaders()
+    });
+  }catch(e){
+    alert('서버 오류'); return;
+  }
+  if(res.status === 401){ window.location.href = '/auth'; return; }
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    alert(err.detail || '삭제 실패'); return;
+  }
+  localStorage.removeItem(`postit:${currentId}`);
+  await loadList();
+});
+
+/* ===== 포스트잇(랜덤 명언) ===== */
+const note = document.getElementById('note');
+const noteText = document.getElementById('note-text');
+const noteAuthor = document.getElementById('note-author');
+const noteShuffle = document.getElementById('note-shuffle');
+const noteClose = document.getElementById('note-close');
+const bookmarkBtn = document.getElementById('bookmark-btn');
+
+async function loadRandomQuote(){
+  try{
+    const res = await fetch('/quotes/random_quote', { headers: authHeaders() });
+    const q = await res.json();
+    if(res.ok){
+      currentQuoteId = q.id;
+      noteText.textContent = q.content || '(내용 없음)';
+      noteAuthor.textContent = q.author ? `— ${q.author}` : '';
+      note.classList.add('show');
+
+      const bookmarked = isQuoteBookmarked(q.id);
+      renderBookmarkState(bookmarked);
+
+      persistNote({content:noteText.textContent, author:noteAuthor.textContent, visible:true});
+      renderList();
+    }else{
+      noteText.textContent = '명언을 불러오지 못했땃.'; noteAuthor.textContent='';
+    }
+  }catch{
+    noteText.textContent = '네트워크 오류 땃…'; noteAuthor.textContent='';
+  }
+}
+
+noteShuffle.addEventListener('click', loadRandomQuote);
+noteClose.addEventListener('click', ()=>{
+  hideNote();
+  persistNote({visible:false});
+  renderList();
+});
+
+function hideNote(){
+  note.classList.remove('show');
+  note.classList.remove('bookmarked');
+}
+
+/* 포스트잇 저장/복구 */
+function noteKey(id){
+  const diaryId = typeof id === 'number' ? id : currentId;
+  return diaryId ? `postit:${diaryId}` : null;
+}
+function persistNote(patch, id){
+  const key = noteKey(id); if(!key) return;
+  const cur = JSON.parse(localStorage.getItem(key) || '{}');
+  const state = Object.assign(cur, patch);
+  localStorage.setItem(key, JSON.stringify(state));
+}
+function hasNoteForDiary(id){
+  const st = JSON.parse(localStorage.getItem(`postit:${id}`) || '{}');
+  return !!st.visible;
+}
+function restoreNoteForCurrent(){
+  const key = noteKey(); if(!key) return;
+  const st = JSON.parse(localStorage.getItem(key) || '{}');
+  if(st.content){ noteText.textContent = st.content; noteAuthor.textContent = st.author || ''; }
+  note.classList.toggle('show', !!st.visible);
+  renderList();
+}
+
+/* 🔥 리스트에서 바로 포스트잇 토글할 때 쓰는 함수 */
+function toggleDiaryNote(diaryId){
+  const key = noteKey(diaryId);
+  const st = JSON.parse(localStorage.getItem(key) || '{}');
+  const willShow = !st.visible;
+
+  // 현재 보고 있는 일기면 포스트잇 DOM도 토글
+  if(currentId === diaryId){
+    if(willShow){
+      // 포스트잇 열 때는 명언 새로 뽑아도 되고, 저장된 내용 있으면 그걸로
+      if(st.content){
+        noteText.textContent = st.content;
+        noteAuthor.textContent = st.author || '';
+        note.classList.add('show');
+      }else{
+        // 새로 뽑자
+        loadRandomQuote();
+      }
+    }else{
+      hideNote();
+    }
+  }
+
+  persistNote({visible:willShow}, diaryId);
+  renderList();
+}
+
+/* ===== 명언 북마크 ===== */
+function getLocalBookmarks(){
+  return JSON.parse(localStorage.getItem(localBookmarkKey) || '[]');
+}
+function saveLocalBookmarks(list){
+  localStorage.setItem(localBookmarkKey, JSON.stringify(list));
+}
+function isQuoteBookmarked(id){
+  const list = getLocalBookmarks();
+  return list.includes(id);
+}
+function renderBookmarkState(active){
+  if(active){
+    bookmarkBtn.classList.add('active');
+    note.classList.add('bookmarked');
+  }else{
+    bookmarkBtn.classList.remove('active');
+    note.classList.remove('bookmarked');
+  }
+}
+
+/* 북마크 리스트 렌더 */
+function renderBookmarkList(){
+  const list = getLocalBookmarks();
+  bookmarkListBox.innerHTML = '';
+  if(list.length === 0){
+    bookmarkListBox.innerHTML = '<div class="empty">아직 북마크한 명언이 없땃.</div>';
+    return;
+  }
+  list.forEach(id=>{
+    const item = document.createElement('div');
+    item.className = 'bookmark-item';
+    item.innerHTML = `
+      <div>
+        <strong>#${id}</strong>
+        <small>— 북마크된 명언</small>
+      </div>
+      <button class="bookmark-remove" data-id="${id}">삭제</button>
+    `;
+    bookmarkListBox.appendChild(item);
+  });
+
+  bookmarkListBox.querySelectorAll('.bookmark-remove').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const id = Number(e.target.getAttribute('data-id'));
+      const cur = getLocalBookmarks().filter(x=>x !== id);
+      saveLocalBookmarks(cur);
+      renderBookmarkList();
+      if(currentQuoteId === id){
+        renderBookmarkState(false);
+      }
+    });
+  });
+}
+
+bookmarkBtn.addEventListener('click', async ()=>{
+  if(!currentQuoteId) return;
+  try{
+    const res = await fetch(`/quotes/${currentQuoteId}/bookmark`, {
+      method:'POST',
+      headers: authHeaders()
+    });
+    if(res.status === 401){ window.location.href = '/auth'; return; }
+    if(res.ok){
+      const list = getLocalBookmarks();
+      if(!list.includes(currentQuoteId)){
+        list.push(currentQuoteId);
+        saveLocalBookmarks(list);
+      }
+      renderBookmarkState(true);
+      renderBookmarkList();
+    }else{
+      alert('북마크 실패했땃.');
+    }
+  }catch(e){
+    alert('서버와 통신 실패했땃.');
+  }
+});
+
+/* ===== 유틸 ===== */
+function formatDate(x){ try{ return new Date(x).toLocaleString(); }catch{return x||'';} }
+
+/* ===== init ===== */
+(async ()=>{
+  await loadList();
+  renderBookmarkList();
+})();
+</script>
+</body>
+</html>

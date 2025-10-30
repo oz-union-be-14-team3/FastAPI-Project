@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Autumn Leather Diary — Login</title>
+  <style>
+    :root{
+      --bg1:#f2eadf;
+      --bg2:#e7d7c5;
+      --sun:#fff6c9;
+      --leaf-red:#c2543b;
+      --leaf-gold:#d9a323;
+      --leaf-yellow:#f1c84b;
+      --leather:#6a4a3c;
+      --leather-hi:#7a5444;
+      --leather-lo:#4e352a;
+      --stitch:#efdfc9;
+      --paper:#fffdf7;
+      --ink:#3b2b21;
+      --accent:#9b6b47;
+      --accent2:#b97f57;
+      --ok:#1a8d5a;
+      --err:#b9364b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--ink);
+      background:
+        radial-gradient(1400px 700px at 10% -5%, #ffffffd0 0 35%, #0000 40%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
+      overflow-x:hidden;
+      font-family: "Pretendard","Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+    .scene{position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0;}
+    .sunrays{
+      position:absolute; inset:-10% -10% auto -10%; height:60%;
+      background:
+        linear-gradient(75deg, #0000 0 20%, rgba(255,255,255,.35) 40%, #0000 60%) 0 0/100% 100% no-repeat,
+        linear-gradient(65deg, #0000 0 35%, rgba(255,255,255,.22) 55%, #0000 75%) 0 0/100% 100% no-repeat;
+      filter: blur(1px); opacity:.65;
+    }
+    .leaves{ position:absolute; inset:0; }
+    .leaf{
+      position:absolute; width:28px; height:28px; opacity:.9; transform-origin:center;
+      animation: fall linear;
+    }
+    .leaf svg{ width:100%; height:100%; filter: drop-shadow(0 3px 2px rgba(0,0,0,.15)); }
+    @keyframes fall{
+      0%{ transform: translate3d(var(--x,0px),-10vh,0) rotate(0deg); opacity:0 }
+      10%{ opacity:1 }
+      100%{ transform: translate3d(calc(var(--x,0px) + var(--dx, 0px)), 110vh,0) rotate(var(--rot, 90deg)); opacity:.95}
+    }
+    .wrap{
+      min-height:100%; display:grid; place-items:center; padding:64px 16px;
+      position:relative; z-index:1;
+    }
+    .back-cover{
+      position:absolute;
+      width:min(1180px, 100vw - 40px);
+      height:580px;
+      background:
+        repeating-linear-gradient(35deg, rgba(0,0,0,.08) 0 3px, rgba(0,0,0,0) 3px 9px),
+        linear-gradient(180deg, #5a3f33, #3f2b23);
+      border-radius:28px;
+      top:50%; left:50%;
+      transform:translate(-50%, -50%) rotate(-1.2deg);
+      box-shadow:0 36px 70px rgba(36,20,10,.35), inset 0 3px 0 rgba(255,255,255,.05);
+    }
+    .back-cover::before{
+      content:""; position:absolute; inset:12px; border:2px solid rgba(255,220,190,.08); border-radius:24px;
+    }
+    .inner-cover{
+      position:absolute;
+      width:min(1110px, 100vw - 60px);
+      height:550px;
+      background:
+        repeating-linear-gradient(25deg, rgba(0,0,0,.04) 0 3px, rgba(0,0,0,0) 3px 7px),
+        radial-gradient(800px 400px at 10% 0%, #8a5f46 0, #523529 60%);
+      border-radius:24px;
+      top:calc(50% + 6px); left:calc(50% - 6px);
+      transform:translate(-50%, -50%) rotate(-0.4deg);
+      box-shadow:0 25px 50px rgba(0,0,0,.25), inset 0 2px 0 rgba(255,255,255,.06);
+    }
+    .inner-cover::after{
+      content:""; position:absolute; inset:16px; border:1px dashed rgba(255,255,255,.12); border-radius:20px;
+    }
+    .diary{
+      width:min(1050px,96vw); min-height:560px; border-radius:22px;
+      display:grid; grid-template-columns: 1.1fr 1.2fr; gap:0;
+      box-shadow:
+        0 35px 70px rgba(62,38,12,.35),
+        0 6px 0 rgba(54,36,26,.35) inset,
+        0 -4px 0 rgba(255,255,255,.06) inset;
+      position:relative;
+      background:
+        repeating-linear-gradient( 25deg, rgba(0,0,0,.05) 0 2px, rgba(0,0,0,0) 2px 6px),
+        linear-gradient(180deg, var(--leather-hi), var(--leather-lo));
+      z-index:3;
+    }
+    .diary::after{
+      content:""; position:absolute; left:5%; right:5%; bottom:-22px; height:36px;
+      background: radial-gradient(60% 100% at 50% 0, rgba(0,0,0,.3), transparent 70%);
+      filter: blur(4px);
+    }
+    .cover{
+      position:relative; padding:34px 32px 34px 42px; color:#f7efe7;
+      border-right: 2px solid rgba(0,0,0,.25);
+    }
+    .stitches{
+      position:absolute; inset:16px auto 16px 16px; right:-2px;
+      border-left: 2px dashed var(--stitch);
+      filter: drop-shadow(0 0 1px rgba(255,255,255,.25));
+    }
+    .strap{
+      position:absolute; top:36px; right:-26px; width:52px; height:120px; border-radius:8px;
+      background: linear-gradient(180deg, #7a5946, #5b3f32);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 10px 24px rgba(0,0,0,.35);
+    }
+    .logo{
+      display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px;
+      background:rgba(255,255,255,.1); backdrop-filter: blur(2px); font-weight:800; letter-spacing:.2px;
+      box-shadow:0 6px 18px rgba(0,0,0,.25) inset, 0 2px 0 rgba(255,255,255,.08);
+    }
+    .cover h1{
+      margin:18px 0 8px; font-size:28px; font-weight:900; letter-spacing:-.3px;
+      text-shadow: 0 1px 0 #3b2b21;
+    }
+    .cover p{ margin:0; opacity:.9 }
+    .tabs{
+      margin-top:18px; display:flex; gap:8px; flex-wrap:wrap;
+    }
+    .tab{
+      font-size:12px; padding:6px 10px; border-radius:999px; cursor:pointer;
+      background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.15);
+      color:#ffeeda; font-weight:600;
+    }
+    .tab.active{ background:#b47f5a; }
+    .paper{
+      position:relative; padding:28px 28px 36px; background:
+        linear-gradient(#0000 30px, rgba(0,0,0,.06) 31px, #0000 32px),
+        var(--paper);
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.08);
+    }
+    .paper-header{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .paper-title{
+      display:flex; align-items:center; gap:10px; font-weight:800; color:#5a3f2c; font-size:20px;
+    }
+    .paper-title .tag{
+      background:#ffe7c7; color:#7a4e25; padding:2px 8px; border-radius:8px; font-size:12px; font-weight:700;
+      border:1px solid #f0cfa2;
+    }
+    .logout-chip{
+      background:#f4ede5; border:1px dashed #bfa183; color:#6b4b38;
+      border-radius:10px; padding:6px 10px; font-size:12px; display:flex; gap:8px; align-items:center;
+    }
+    .logout-chip button{
+      all:unset; cursor:pointer; background:#e9cfb3; border:1px solid #bfa183; padding:3px 8px; border-radius:8px; font-weight:700;
+    }
+    .form-window{
+      margin-top:16px; overflow:hidden; border-radius:14px; border:1px solid #eadccf; background:#fffaf2;
+      box-shadow: 0 10px 26px rgba(121,88,58,.12);
+    }
+    .track{
+      display:flex; width:200%; transition: transform .45s cubic-bezier(.2,.9,.15,1);
+    }
+    .sheet{
+      width:50%; padding:18px 18px 22px;
+      background:
+        linear-gradient(#0000 28px, rgba(0,0,0,.045) 29px, #0000 30px),
+        #fffdf8;
+    }
+    .sheet h3{ margin:4px 4px 10px; font-size:18px; color:#5a3f2c }
+    .row{ display:flex; flex-direction:column; gap:6px; margin:10px 4px }
+    label{ font-size:12px; color:#6b4b38; font-weight:700 }
+    input{
+      border:1.6px solid #d7c1a9; border-radius:10px; padding:10px 12px; font-size:14px; outline:none; background:#fffdfa;
+    }
+    input:focus{ border-color:#b78b65; box-shadow:0 0 0 4px #b78b6526 }
+    .btn{
+      all:unset; display:block; width:100%; text-align:center; padding:10px 12px; margin:10px 4px 0;
+      border-radius:12px; font-weight:800; color:#fff; cursor:pointer;
+      background: linear-gradient(120deg,#b97f57,#7f573e);
+      box-shadow: 0 8px 18px rgba(121,88,58,.35);
+    }
+    .link{
+      margin:8px 6px 0; text-align:right; font-size:12px; color:#7a4e25; cursor:pointer; text-decoration:underline;
+    }
+    .msg{ min-height:18px; font-size:12px; margin:6px 6px 0 }
+    .ok{ color:var(--ok)} .err{ color:var(--err)}
+    @media (max-width:980px){
+      .back-cover, .inner-cover{display:none}
+      .diary{ grid-template-columns:1fr; }
+      .cover{ min-height:220px; border-right:none; border-bottom:2px solid rgba(0,0,0,.2) }
+      .strap{ display:none }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="sunrays"></div>
+    <div class="leaves" id="leaves"></div>
+  </div>
+
+  <div class="wrap">
+    <div class="back-cover" aria-hidden="true"></div>
+    <div class="inner-cover" aria-hidden="true"></div>
+
+    <section class="diary" aria-label="가을 가죽 다이어리">
+      <div class="cover">
+        <div class="stitches" aria-hidden="true"></div>
+        <div class="strap" aria-hidden="true"></div>
+
+        <span class="logo">📔 Autumn Diary</span>
+        <h1>가을 다이어리 로그인</h1>
+        <p>나무 그늘 아래 여는 아침 노트. 오늘의 문장을 남겨보자.</p>
+
+        <div class="tabs">
+          <button class="tab active" data-to="login">로그인</button>
+          <button class="tab" data-to="register">회원가입</button>
+          <button class="tab" data-to="about">도움말</button>
+        </div>
+      </div>
+
+      <div class="paper">
+        <div class="paper-header">
+          <div class="paper-title">
+            <span>Autumn Session</span>
+            <span class="tag" id="mode-tag">/auth/login</span>
+          </div>
+        </div>
+
+        <div class="form-window" role="region" aria-live="polite">
+          <div class="track" id="track">
+            <!-- 로그인 -->
+            <div class="sheet" id="sheet-login">
+              <h3>01. 로그인</h3>
+              <div class="row">
+                <label for="login-username">아이디</label>
+                <input id="login-username" type="text" autocomplete="username" placeholder="ram" />
+              </div>
+              <div class="row">
+                <label for="login-password">비밀번호</label>
+                <input id="login-password" type="password" autocomplete="current-password" placeholder="••••••••" />
+              </div>
+              <button class="btn" id="login-btn">다이어리 열기</button>
+              <div class="link" id="to-register">회원가입으로 이동</div>
+              <div id="login-msg" class="msg"></div>
+            </div>
+
+            <!-- 회원가입 -->
+            <div class="sheet" id="sheet-register" aria-hidden="true">
+              <h3>02. 새 다이어리 만들기</h3>
+              <div class="row">
+                <label for="reg-username">아이디</label>
+                <input id="reg-username" type="text" autocomplete="username" placeholder="ram" />
+              </div>
+              <div class="row">
+                <label for="reg-email">이메일</label>
+                <input id="reg-email" type="email" autocomplete="email" placeholder="you@example.com" />
+              </div>
+              <div class="row">
+                <label for="reg-password">비밀번호</label>
+                <input id="reg-password" type="password" autocomplete="new-password" placeholder="8자 이상" />
+              </div>
+              <button class="btn" id="register-btn">다이어리 생성</button>
+              <div class="link" id="to-login">로그인으로 이동</div>
+              <div id="register-msg" class="msg"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="msg" id="help" style="margin-top:10px;color:#7a4e25;">
+          • API: <code>/auth/login</code>, <code>/auth/register</code>, <code>/auth/logout</code> 에 연결됨.  
+          • 성공 시 <b>localStorage.access_token</b> 저장 → <b>/diaries</b> 로 이동하는거시땃.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // 낙엽 계속 떨어지게
+    (function () {
+      const cont = document.getElementById('leaves');
+      const colors = ['var(--leaf-red)','var(--leaf-gold)','var(--leaf-yellow)'];
+      const BASE_COUNT = 18;
+      const INTERVAL = 1800;
+      function makeLeaf() {
+        const d = document.createElement('div');
+        d.className = 'leaf';
+        const x = Math.random() * window.innerWidth;
+        const dx = (Math.random() * 220 - 110);
+        const rot = (Math.random() * 360 + 90) + 'deg';
+        const delay = Math.random() * 2;
+        const dur = 10 + Math.random() * 10;
+        d.style.setProperty('--x', x + 'px');
+        d.style.setProperty('--dx', dx + 'px');
+        d.style.setProperty('--rot', rot);
+        d.style.animationDuration = dur + 's';
+        d.style.animationDelay = delay + 's';
+        const color = colors[(Math.random() * colors.length) | 0];
+        d.innerHTML = `
+          <svg viewBox="0 0 64 64" fill="${color}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M32 6c-9 2-22 14-24 24-2 10 8 20 18 18 10-2 22-15 24-24S41 4 32 6z"/>
+            <path d="M30 36c6-4 11-9 17-15" stroke="#7a4e25" stroke-width="3" fill="none" stroke-linecap="round"/>
+          </svg>
+        `;
+        d.addEventListener('animationend', () => {
+          d.remove();
+          setTimeout(makeLeaf, 600 + Math.random() * 1200);
+        });
+        cont.appendChild(d);
+      }
+      for (let i = 0; i < BASE_COUNT; i++) makeLeaf();
+      setInterval(() => {
+        if (cont.childElementCount < 30) makeLeaf();
+      }, INTERVAL);
+    })();
+
+    // 탭 전환
+    const track = document.getElementById('track');
+    const tag = document.getElementById('mode-tag');
+    const tabs = document.querySelectorAll('.tab');
+    function go(mode){
+      if(mode==='login'){
+        track.style.transform='translateX(0%)';
+        tag.textContent='/auth/login';
+        tabs.forEach(t=>t.classList.toggle('active', t.dataset.to==='login'));
+      }else if(mode==='register'){
+        track.style.transform='translateX(-50%)';
+        tag.textContent='/auth/register';
+        tabs.forEach(t=>t.classList.toggle('active', t.dataset.to==='register'));
+      }else{
+        tabs.forEach(t=>t.classList.toggle('active', t.dataset.to==='about'));
+      }
+    }
+    tabs.forEach(t=> t.addEventListener('click', ()=>go(t.dataset.to)));
+    document.getElementById('to-register').onclick=()=>go('register');
+    document.getElementById('to-login').onclick=()=>go('login');
+
+// 로그인
+document.getElementById('login-btn').addEventListener('click', async ()=>{
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const msg = document.getElementById('login-msg');
+  msg.className = 'msg';
+  msg.textContent = '로그인 중...';
+
+  try{
+    const res = await fetch('/auth/login', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json().catch(()=> ({}));
+
+    if(res.ok){
+      if(data && data.access_token){
+        localStorage.setItem('access_token', data.access_token);
+      }
+      // ✅ 여기! 보호된 API로 바로 가지 말고
+      //    HTML만 주는 페이지로 이동
+      window.location.href = '/diaries/';
+    }else{
+      msg.textContent = data?.detail || '로그인 실패';
+      msg.classList.add('err');
+    }
+  }catch(e){
+    msg.textContent = '네트워크 오류';
+    msg.classList.add('err');
+  }
+});
+
+    // 회원가입
+    document.getElementById('register-btn').addEventListener('click', async ()=>{
+      const username = document.getElementById('reg-username').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const msg = document.getElementById('register-msg');
+      msg.className='msg';
+      msg.textContent='만드는 중...';
+
+      try{
+        const res = await fetch('/auth/register', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ username, email, password })
+        });
+        const data = await res.json().catch(()=> ({}));
+
+        if(res.ok){
+          msg.textContent='완료! 이제 로그인해봐.';
+          msg.classList.add('ok');
+          // 회원가입 성공하면 로그인 탭으로 자동 슬라이드
+          go('login');
+        }else{
+          msg.textContent = data?.detail || '회원가입 실패';
+          msg.classList.add('err');
+        }
+      }catch(e){
+        msg.textContent='네트워크 오류';
+        msg.classList.add('err');
+      }
+    });
+
+    // 로그아웃
+    document.getElementById('logout-btn').addEventListener('click', async ()=>{
+      const token = localStorage.getItem('access_token');
+      if(!token){
+        document.getElementById('help').textContent = '이미 로그아웃 상태인거시땃.';
+        return;
+      }
+      try{
+        await fetch('/auth/logout', {
+          method:'POST',
+          headers:{ 'Authorization': 'Bearer ' + token }
+        });
+      }catch(e){
+      }finally{
+        localStorage.removeItem('access_token');
+        document.getElementById('help').textContent = '로그아웃했어. 다시 로그인해.';
+      }
+    });
+  </script>
+</body>
+</html>
