@@ -21,7 +21,6 @@ def get_user_question_service() -> UserQuestionService:
 
 
 # API 엔드포인트
-
 @router.get("/list", response_model=List[QuestionResponse], summary="모든 질문 조회")
 async def get_all_questions(service: QuestionService = Depends(get_question_service)):
     """

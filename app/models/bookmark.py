@@ -25,7 +25,3 @@ class Bookmark(Model):
         table = "bookmarks"
 
 
-
-
-
-        

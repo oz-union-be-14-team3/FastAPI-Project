@@ -9,13 +9,13 @@ router = APIRouter(prefix="/diaries", tags=["Diary CRUD"])
 
 
 # [1] 내 모든 일기 조회
-@router.get("/", response_model=list[DiaryOut])
+@router.get("/", response_model=list[DiaryOut], summary="내 모든 일기 조회")
 async def list_diaries(current_user: User = Depends(get_current_user)):
     diaries = await DiaryRepository.get_all_diaries_by_user(current_user.id)
     return diaries
 
 # [2] 단일 일기 조회
-@router.get("/{diary_id}", response_model=DiaryOut)
+@router.get("/{diary_id}", response_model=DiaryOut, summary="단일 일기 상세 조회")
 async def get_diary(diary_id: int, current_user: User = Depends(get_current_user)):
     diary = await DiaryRepository.get_diary_by_id(diary_id)
     if not diary:
@@ -25,7 +25,7 @@ async def get_diary(diary_id: int, current_user: User = Depends(get_current_user
     return diary
 
 # [3] 일기 생성 (자동으로 user 연결)
-@router.post("/", response_model=DiaryOut, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=DiaryOut, status_code=status.HTTP_201_CREATED, summary="새 일기 작성")
 async def create_diary(
     diary_data: DiaryCreate,
     current_user: User = Depends(get_current_user)
@@ -38,7 +38,7 @@ async def create_diary(
     return new_diary
 
 # [4] 일기 수정 (작성자 본인만)
-@router.put("/{diary_id}", response_model=DiaryOut)
+@router.put("/{diary_id}", response_model=DiaryOut, summary="기존 일기 수정")
 async def update_diary(
     diary_id: int,
     diary_data: DiaryUpdate,
@@ -53,8 +53,8 @@ async def update_diary(
     updated_diary = await DiaryRepository.update_diary(diary_id, diary_data)
     return updated_diary
 
-# ✅ [5] 일기 삭제 (작성자 본인만)
-@router.delete("/{diary_id}", status_code=status.HTTP_204_NO_CONTENT)
+# [5] 일기 삭제 (작성자 본인만)
+@router.delete("/{diary_id}", status_code=status.HTTP_204_NO_CONTENT, summary="일기 삭제")
 async def delete_diary(diary_id: int, current_user: User = Depends(get_current_user)):
     diary = await DiaryRepository.get_diary_by_id(diary_id)
     if not diary:
