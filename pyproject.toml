@@ -13,6 +13,11 @@ pydantic-settings = "^2.11.0"
 tortoise-orm = "^0.25.1"
 aerich = "^0.9.2"
 asyncpg = "^0.30.0"
+playwright = "^1.55.0"
+httpx = "^0.28.1"
+beautifulsoup4 = "^4.14.2"
+lxml = "^6.0.2"
+python-jose = "^3.5.0"
 
 
 [build-system]

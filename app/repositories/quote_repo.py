@@ -1,5 +1,7 @@
 from typing import List, Dict, Tuple, Optional
+from app.models.bookmark import Bookmark
 from app.models.quote import Quote
+from app.models.user import User
 from tortoise.transactions import in_transaction
 
 # 데이터베이스 CRUD 쿼리를 직접 실행하고 파이썬 객체를 반환.
@@ -43,3 +45,27 @@ class QuoteRepository:
                 return Quote(id=row[0], content=row[1], author=row[2])
 
         return None
+
+class BookmarkRepository:
+    """
+    북마크 모델에 대한 데이터 접근 로직 관리
+    """
+
+    @staticmethod
+    async def get_or_create_bookmark(user: User, quote_obj: Quote) -> Tuple[Bookmark, bool]:
+        """
+        주어진 User 객체와 Quote 객체로 북마크를 찾거나 새로 생성합니다.
+
+        :param user: 현재 로그인된 User 객체
+        :param quote_obj: 북마크할 Quote 객체
+        :return: 생성되거나 찾아진 Bookmark 객체와 생성 여부(True/False)
+        """
+
+        # 중복 북마크를 방지 및 생성/조회 처리.
+        bookmark_obj, created = await Bookmark.get_or_create(
+            user=user,
+            quote=quote_obj,
+            defaults={} # 추가로 업데이트할 필드가 없으므로 빈 dict
+        )
+
+        return bookmark_obj, created
