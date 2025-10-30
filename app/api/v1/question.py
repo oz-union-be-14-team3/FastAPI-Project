@@ -18,28 +18,7 @@ def get_user_question_service() -> UserQuestionService:
     repo = UserQuestionRepository()
     return UserQuestionService(repository=repo)
 
-#! 테스트용 라우터 (배포 전 무조건 삭제)
-from app.models.question import Question
-from tortoise import Tortoise
 
-@router.delete("/clear_all", summary="질문 데이터 전체 삭제 및 ID 초기화", status_code=status.HTTP_200_OK)
-async def delete_all_questions():
-    try:
-        # 1️⃣ 모든 데이터 삭제
-        deleted_count = await Question.all().delete()
-
-        # 2️⃣ ID 시퀀스 초기화 (PostgreSQL)
-        await Tortoise.get_connection("default").execute_query(
-            "ALTER SEQUENCE questions_id_seq RESTART WITH 1;"
-        )
-
-        return {"message": f"모든 질문 삭제 및 ID 초기화 완료 ({deleted_count}개 삭제됨)"}
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"삭제 중 오류 발생: {str(e)}"
-        )
 
 # API 엔드포인트
 
