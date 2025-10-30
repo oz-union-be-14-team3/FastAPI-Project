@@ -7,13 +7,15 @@ class QuestionBase(BaseModel):
 
 
 class QuestionCreate(QuestionBase):
-    """크롤링에 사용 예쩡"""
+    """
+    새로운 질문을 추가할 때 사용하는 모델 (크롤링 시에도 사용)
+    """
     pass
 
 
 class QuestionResponse(QuestionBase):
     """
-    유저에게 랜덤 질문 생성.
+    랜덤으로 선택된 질문을 유저에게 반환할 때 사용하는 응답 모델
     """
     id: int
 
@@ -27,7 +29,7 @@ class UserQuestionBase(BaseModel):
 
 class UserQuestionCreate(UserQuestionBase):
     """
-    유저가 질문을 받을 시.
+    유저가 질문을 받았을 때, 해당 유저-질문 관계를 생성하는 요청 모델
     """
     user_id: int
     question_id: int
@@ -35,7 +37,7 @@ class UserQuestionCreate(UserQuestionBase):
 
 class UserQuestionResponse(UserQuestionBase):
     """
-    
+    유저가 받은 질문 정보를 반환할 때 사용하는 응답 모델
     """
     id: int
     user_id: int

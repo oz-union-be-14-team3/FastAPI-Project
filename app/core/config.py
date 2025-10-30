@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "0.119.1"
 
     QUOTES_SCRAPE_TARGET_URL: str = "https://quotes-site-xi.vercel.app" # 임시 사이트입니다.    
-    QUESTION_SCRAPE_TARGET_RUL: str = "https://ksmb.tistory.com/entry/%EC%98%A4%EB%8A%98-%EB%82%98%EC%97%90%EA%B2%8C-%ED%95%98%EB%8A%94-%EC%A7%88%EB%AC%B8-%EB%8C%80%EB%8B%B5?utm_source=chatgpt.com"
+    QUESTION_SCRAPE_TARGET_URL: str = "https://ksmb.tistory.com/entry/%EC%98%A4%EB%8A%98-%EB%82%98%EC%97%90%EA%B2%8C-%ED%95%98%EB%8A%94-%EC%A7%88%EB%AC%B8-%EB%8C%80%EB%8B%B5?utm_source=chatgpt.com"
 
     @property
     def DB_URL(self):
