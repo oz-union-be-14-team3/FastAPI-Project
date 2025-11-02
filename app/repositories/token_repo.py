@@ -2,6 +2,7 @@ from datetime import datetime
 from app.models.token_blacklist import TokenBlacklist
 from tortoise.exceptions import IntegrityError
 
+
 class TokenRepository:
     @staticmethod
     async def add(token: str, user_id: int, expired_at: datetime):

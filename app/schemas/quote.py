@@ -2,9 +2,11 @@
 from pydantic import BaseModel
 from datetime import datetime
 
+
 class QuoteBase(BaseModel):
     content: str
     author: str
+
 
 class QuoteResponse(QuoteBase):
     id: int
@@ -13,8 +15,10 @@ class QuoteResponse(QuoteBase):
         # Pydantic이 ORM 객체(Tortoise Model)에서 데이터를 읽을 수 있게 합니다.
         from_attributes = True
 
+
 class BookmarkBase(BaseModel):
-    pass # 추가 필드 없음
+    pass  # 추가 필드 없음
+
 
 class BookmarkResponse(BookmarkBase):
     id: int

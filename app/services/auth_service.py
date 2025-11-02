@@ -6,6 +6,7 @@ from app.repositories.token_repo import TokenRepository
 from datetime import datetime
 from app.core.config import settings
 
+
 class AuthService:
     @staticmethod
     async def register(username: str, email: str, password: str):

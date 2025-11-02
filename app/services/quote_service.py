@@ -11,7 +11,7 @@ from app.models.user import User
 class QuoteService:
     def __init__(self, repository: QuoteRepository):
         self.repository = repository
-        self.scrape_url = settings.QUOTES_SCRAPE_TARGET_URL # config에서 URL 가져오기
+        self.scrape_url = settings.QUOTES_SCRAPE_TARGET_URL  # config에서 URL 가져오기
 
     async def get_all_quotes(self) -> List[Quote]:
         return await self.repository.get_all_quotes()
@@ -55,6 +55,7 @@ class QuoteService:
         :return: int 삭제된 명언의 수
         """
         return await self.repository.delete_all_quotes()
+
 
 class BookmarkService:
     def __init__(self, repository: BookmarkRepository):

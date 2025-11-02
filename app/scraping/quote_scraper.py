@@ -19,7 +19,7 @@ async def fetch_html(url: str) -> Optional[str]:
 
             # 명언 태그가 로딩될 때까지 기다림
             # HTML 이미지에서 확인한 명언 태그인 'div.quote'가 최소 하나 나올 때까지 기다립니다.
-            await page.wait_for_selector('div.quote')
+            await page.wait_for_selector("div.quote")
 
             # 로딩이 완료된 후, 페이지의 최종 HTML을 가져옵니다.
             html_content = await page.content()
@@ -44,17 +44,14 @@ def parse_quotes_from_html(html_content: str) -> List[Dict[str, str]]:
     quotes_data: List[Dict[str, str]] = []
 
     # 파싱 시작 (html.parser와 달리 별도설치 필요. 성능빠름.)
-    soup = BeautifulSoup(html_content, 'lxml')
+    soup = BeautifulSoup(html_content, "lxml")
 
-    for element in soup.find_all('div', class_='quote-card'):
+    for element in soup.find_all("div", class_="quote-card"):
         try:
-            quote_text = element.find('p', class_='quote_message로').get_text(strip=True)
-            author_name = element.find('p', class_='author_name로').get_text(strip=True)
+            quote_text = element.find("p", class_="quote_message").get_text(strip=True)
+            author_name = element.find("p", class_="author_name").get_text(strip=True)
 
-            quotes_data.append({
-                "content": quote_text,
-                "author": author_name
-            })
+            quotes_data.append({"content": quote_text, "author": author_name})
         except AttributeError:
             # 파싱 실패시 건너뜁니다.
             continue

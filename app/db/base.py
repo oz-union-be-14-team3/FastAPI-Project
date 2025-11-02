@@ -1,6 +1,7 @@
 from tortoise.contrib.fastapi import register_tortoise
 from app.core.config import settings
 
+
 def db_connection(app):
     register_tortoise(
         app,

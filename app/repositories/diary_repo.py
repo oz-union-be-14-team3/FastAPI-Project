@@ -2,8 +2,8 @@ from app.models.diary import Diary
 from app.models.user import User
 from app.schemas.diary import DiaryUpdate
 
-class DiaryRepository:
 
+class DiaryRepository:
     @staticmethod
     async def get_all_diaries_by_user(user_id: int):
         return await Diary.filter(user_id=user_id).all()

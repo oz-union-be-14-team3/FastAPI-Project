@@ -7,6 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 oauth2_scheme = HTTPBearer()
 
+
 async def get_current_user(token: HTTPAuthorizationCredentials = Depends(oauth2_scheme)):
     token = token.credentials
     # 로그아웃된(블랙리스트) 토큰인지 확인

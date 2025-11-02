@@ -24,7 +24,7 @@ class QuestionResponse(QuestionBase):
 
 
 class UserQuestionBase(BaseModel):
-    pass 
+    pass
 
 
 class UserQuestionCreate(UserQuestionBase):

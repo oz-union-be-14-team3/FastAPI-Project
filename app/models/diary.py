@@ -1,6 +1,7 @@
 from tortoise import fields
 from tortoise.models import Model
 
+
 class Diary(Model):
     id = fields.IntField(pk=True)
     title = fields.CharField(max_length=100)

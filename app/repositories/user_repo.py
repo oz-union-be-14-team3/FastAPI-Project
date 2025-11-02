@@ -1,5 +1,6 @@
 from app.models.user import User
 
+
 class UserRepository:
     @staticmethod
     async def create_user(username: str, email: str, password_hash: str):

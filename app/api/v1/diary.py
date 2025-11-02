@@ -38,10 +38,7 @@ async def get_diary(diary_id: int, current_user: User = Depends(get_current_user
 
 
 @router.post("/", response_model=DiaryOut, status_code=status.HTTP_201_CREATED, summary="새 일기 작성")
-async def create_diary(
-    diary_data: DiaryCreate,
-    current_user: User = Depends(get_current_user)
-):
+async def create_diary(diary_data: DiaryCreate, current_user: User = Depends(get_current_user)):
     new_diary = await DiaryRepository.create_diary(
         title=diary_data.title,
         content=diary_data.content,
@@ -51,11 +48,7 @@ async def create_diary(
 
 
 @router.put("/{diary_id}", response_model=DiaryOut, summary="기존 일기 수정")
-async def update_diary(
-    diary_id: int,
-    diary_data: DiaryUpdate,
-    current_user: User = Depends(get_current_user)
-):
+async def update_diary(diary_id: int, diary_data: DiaryUpdate, current_user: User = Depends(get_current_user)):
     diary = await DiaryRepository.get_diary_by_id(diary_id)
     if not diary:
         raise HTTPException(status_code=404, detail="Diary not found")

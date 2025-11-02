@@ -1,23 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from app.services.question_service import QuestionService, UserQuestionService
 from app.repositories.question_repo import QuestionRepository, UserQuestionRepository
 from app.schemas.question import QuestionResponse, UserQuestionResponse
 from app.core.dependencies import get_current_user
 from app.models.user import User
-from tortoise.exceptions import DoesNotExist
 from typing import List
 
 router = APIRouter(prefix="/questions", tags=["Question"])
+
 
 # 의존성 주입
 def get_question_service() -> QuestionService:
     repo = QuestionRepository()
     return QuestionService(repository=repo)
 
+
 def get_user_question_service() -> UserQuestionService:
     repo = UserQuestionRepository()
     return UserQuestionService(repository=repo)
-
 
 
 # API 엔드포인트
@@ -76,6 +76,8 @@ async def get_my_questions(
     현재 로그인한 유저가 받은 모든 질문을 반환합니다.
     """
     return await service.get_user_questions(current_user)
+
+
 @router.get("/me/latest", response_model=UserQuestionResponse, summary="가장 최근 질문 조회")
 async def get_my_latest_question(
     service: UserQuestionService = Depends(get_user_question_service),
@@ -88,6 +90,7 @@ async def get_my_latest_question(
     if not latest:
         raise HTTPException(status_code=404, detail="최근 받은 질문이 없습니다.")
     return latest
+
 
 @router.delete("/delete_all", summary="저장된 질문을 모두 삭제합니다.")
 async def delete_all_quotes(service: QuestionService = Depends(get_question_service)):

@@ -10,4 +10,3 @@ class Question(Model):
 
     class Meta:
         table = "questions"
-

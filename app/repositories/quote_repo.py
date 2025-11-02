@@ -4,6 +4,7 @@ from app.models.quote import Quote
 from app.models.user import User
 from tortoise.transactions import in_transaction
 
+
 # 데이터베이스 CRUD 쿼리를 직접 실행하고 파이썬 객체를 반환.
 class QuoteRepository:
     """
@@ -46,7 +47,9 @@ class QuoteRepository:
         # ⭐️ Raw SQL을 실행하여 랜덤 ID를 가진 명언 하나를 조회합니다.
         async with in_transaction() as connection:
             # 랜덤 정렬 후 LIMIT 1 만 가져옴. (id, content, author)
-            result = await connection.execute_query("SELECT * FROM quotes ORDER BY RANDOM() LIMIT 1")
+            result = await connection.execute_query(
+                "SELECT * FROM quotes ORDER BY RANDOM() LIMIT 1"
+            )
 
             # Quote 객체로 변환.
             if result and result[1]:
@@ -55,6 +58,7 @@ class QuoteRepository:
                 return Quote(id=row[0], content=row[1], author=row[2])
 
         return None
+
 
 class BookmarkRepository:
     """
@@ -70,12 +74,11 @@ class BookmarkRepository:
         :param quote_obj: 북마크할 Quote 객체
         :return: 생성되거나 찾아진 Bookmark 객체와 생성 여부(True/False)
         """
-
         # 중복 북마크를 방지 및 생성/조회 처리.
         bookmark_obj, created = await Bookmark.get_or_create(
             user=user,
             quote=quote_obj,
-            defaults={} # 추가로 업데이트할 필드가 없으므로 빈 dict
+            defaults={}  # 추가로 업데이트할 필드가 없으므로 빈 dict
         )
 
         return bookmark_obj, created
