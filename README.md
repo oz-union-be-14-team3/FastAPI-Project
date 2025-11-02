@@ -88,13 +88,8 @@ app/
 
 ## 🗂 ERD
 
-📎 *ERD 이미지 자리*
+<img width="1178" height="566" alt="스크린샷 2025-10-30 오후 7 01 54" src="https://github.com/user-attachments/assets/3abc3e76-d491-4835-b029-b716879065ca" />
 
-![alt text](image-1.png)
-
-```
-![ERD](./docs/ERD.png)
-```
 
 ### ERD 테이블 요약
 
