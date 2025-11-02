@@ -90,7 +90,7 @@ async def get_my_latest_question(
     return latest
 
 @router.delete("/delete_all", summary="저장된 질문을 모두 삭제합니다.")
-async def delete_all_quotes(service: UserQuestionService = Depends(get_user_question_service)):
+async def delete_all_quotes(service: QuestionService = Depends(get_question_service)):
     """
     questions table의 모든 데이터를 삭제합니다.
     """

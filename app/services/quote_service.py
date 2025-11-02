@@ -54,7 +54,7 @@ class QuoteService:
         명언 테이블의 모든 데이터를 지웁니다
         :return: int 삭제된 명언의 수
         """
-        return self.repository.delete_all_quotes()
+        return await self.repository.delete_all_quotes()
 
 class BookmarkService:
     def __init__(self, repository: BookmarkRepository):

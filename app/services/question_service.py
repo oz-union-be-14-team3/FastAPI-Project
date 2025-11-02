@@ -25,7 +25,7 @@ class QuestionService:
         질문 테이블의 모든 데이터를 지웁니다.
         :return: int 삭제된 질문의 수
         """
-        return self.repository.delete_all_questions()
+        return await self.repository.delete_all_questions()
 
     async def save_scraping(self) -> int:
         """
