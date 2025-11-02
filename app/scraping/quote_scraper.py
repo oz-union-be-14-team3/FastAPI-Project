@@ -19,8 +19,8 @@ async def fetch_html(url: str) -> Optional[str]:
             await page.goto(url)
 
             # 명언 태그가 로딩될 때까지 기다림
-            # HTML 이미지에서 확인한 명언 태그인 'div.quote'가 최소 하나 나올 때까지 기다립니다.
-            await page.wait_for_selector("div.quote")
+            # HTML 이미지에서 확인한 명언 태그인 'div.quote-card'가 최소 하나 나올 때까지 기다립니다.
+            await page.wait_for_selector("div.quote-card")
 
             # 로딩이 완료된 후, 페이지의 최종 HTML을 가져옵니다.
             html_content = await page.content()
