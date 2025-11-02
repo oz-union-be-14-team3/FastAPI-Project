@@ -1,10 +1,11 @@
-from app.repositories.question_repo import QuestionRepository, UserQuestionRepository
-from app.scraping.question_scraper import fetch_html, parse_questions_from_html
+from typing import Dict, List, Optional, Tuple
+
+from app.core.config import settings
 from app.models.question import Question
 from app.models.user import User
 from app.models.user_question import UserQuestion
-from app.core.config import settings
-from typing import Optional, List, Dict, Tuple
+from app.repositories.question_repo import QuestionRepository, UserQuestionRepository
+from app.scraping.question_scraper import fetch_html, parse_questions_from_html
 
 
 class QuestionService:

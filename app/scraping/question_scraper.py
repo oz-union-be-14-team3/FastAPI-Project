@@ -1,7 +1,8 @@
 import re
-from typing import List, Dict, Optional
-from playwright.async_api import async_playwright
+from typing import Dict, List, Optional
+
 from bs4 import BeautifulSoup
+from playwright.async_api import async_playwright
 
 
 async def fetch_html(url: str) -> Optional[str]:

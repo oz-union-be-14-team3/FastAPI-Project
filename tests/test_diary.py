@@ -1,7 +1,8 @@
 import pytest
 from httpx import AsyncClient
-from app.main import app
 from tortoise.contrib.test import finalizer, initializer
+
+from app.main import app
 
 
 @pytest.fixture(scope="module", autouse=True)

@@ -1,11 +1,13 @@
-from app.repositories.quote_repo import QuoteRepository, BookmarkRepository
-from app.core.config import settings
-from app.models.quote import Quote
-from app.models.bookmark import Bookmark
-from app.scraping.quote_scraper import fetch_html, parse_quotes_from_html
-from typing import Optional, List, Dict, Tuple
+from typing import Dict, List, Optional, Tuple
+
 from tortoise.exceptions import DoesNotExist
+
+from app.core.config import settings
+from app.models.bookmark import Bookmark
+from app.models.quote import Quote
 from app.models.user import User
+from app.repositories.quote_repo import BookmarkRepository, QuoteRepository
+from app.scraping.quote_scraper import fetch_html, parse_quotes_from_html
 
 
 class QuoteService:

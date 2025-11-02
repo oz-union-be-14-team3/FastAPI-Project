@@ -1,9 +1,9 @@
-from app.api.v1 import auth, diary, quote, question
-from fastapi.responses import PlainTextResponse
-from fastapi import FastAPI
-from app.db.base import db_connection
 import uvicorn
+from fastapi import FastAPI
+from fastapi.responses import PlainTextResponse
 
+from app.api.v1 import auth, diary, question, quote
+from app.db.base import db_connection
 
 app = FastAPI(title="Diary CRUD API")
 

@@ -1,6 +1,14 @@
+from typing import TYPE_CHECKING
+
 from tortoise import fields
 from tortoise.models import Model
 
+# F821 error
+if TYPE_CHECKING:
+    from app.models.bookmark import Bookmark
+    from app.models.diary import Diary
+    from app.models.token_blacklist import TokenBlacklist
+    from app.models.user_question import UserQuestion
 
 class User(Model):
     id = fields.IntField(pk=True)

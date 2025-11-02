@@ -1,6 +1,7 @@
 # 테이블정보 입력
-from pydantic import BaseModel
 from datetime import datetime
+
+from pydantic import BaseModel
 
 
 class QuoteBase(BaseModel):

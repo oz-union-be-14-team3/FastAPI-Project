@@ -1,9 +1,11 @@
-from typing import List, Tuple, Optional, Dict
+from typing import Dict, List, Optional, Tuple
+
 from tortoise.exceptions import DoesNotExist
 from tortoise.transactions import in_transaction
+
 from app.models.question import Question
-from app.models.user_question import UserQuestion
 from app.models.user import User
+from app.models.user_question import UserQuestion
 
 
 class QuestionRepository:

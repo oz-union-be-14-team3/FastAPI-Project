@@ -1,6 +1,8 @@
 from datetime import datetime
-from app.models.token_blacklist import TokenBlacklist
+
 from tortoise.exceptions import IntegrityError
+
+from app.models.token_blacklist import TokenBlacklist
 
 
 class TokenRepository:

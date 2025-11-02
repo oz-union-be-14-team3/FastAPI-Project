@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.templating import Jinja2Templates
+
+from app.core.dependencies import get_current_user, oauth2_scheme
 from app.schemas.user import UserCreate, UserLogin, UserResponse
 from app.services.auth_service import AuthService
-from fastapi.security import HTTPAuthorizationCredentials
-from app.core.dependencies import oauth2_scheme, get_current_user
-from fastapi.templating import Jinja2Templates
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 

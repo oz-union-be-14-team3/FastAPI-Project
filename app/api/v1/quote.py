@@ -1,11 +1,13 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.services.quote_service import QuoteService, BookmarkService
-from app.repositories.quote_repo import QuoteRepository, BookmarkRepository
-from app.schemas.quote import QuoteResponse, BookmarkResponse
 from tortoise.exceptions import DoesNotExist
+
 from app.core.dependencies import get_current_user
 from app.models.user import User
-from typing import List
+from app.repositories.quote_repo import BookmarkRepository, QuoteRepository
+from app.schemas.quote import BookmarkResponse, QuoteResponse
+from app.services.quote_service import BookmarkService, QuoteService
 
 router = APIRouter(prefix="/quotes", tags=["Quote"])
 

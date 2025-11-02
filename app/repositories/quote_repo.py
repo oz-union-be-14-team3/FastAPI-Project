@@ -1,8 +1,10 @@
-from typing import List, Dict, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
+
+from tortoise.transactions import in_transaction
+
 from app.models.bookmark import Bookmark
 from app.models.quote import Quote
 from app.models.user import User
-from tortoise.transactions import in_transaction
 
 
 # 데이터베이스 CRUD 쿼리를 직접 실행하고 파이썬 객체를 반환.

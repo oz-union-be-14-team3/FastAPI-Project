@@ -1,7 +1,8 @@
 # import httpx
+from typing import Dict, List, Optional
+
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
-from typing import Optional, List, Dict
 
 
 async def fetch_html(url: str) -> Optional[str]:

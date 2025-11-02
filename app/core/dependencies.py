@@ -1,9 +1,10 @@
 from fastapi import Depends, HTTPException
-from jose import jwt, JWTError
-from app.core.config import settings
-from app.repositories.user_repo import UserRepository
-from app.repositories.token_repo import TokenRepository
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
+
+from app.core.config import settings
+from app.repositories.token_repo import TokenRepository
+from app.repositories.user_repo import UserRepository
 
 oauth2_scheme = HTTPBearer()
 
