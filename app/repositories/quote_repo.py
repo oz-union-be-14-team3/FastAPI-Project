@@ -22,9 +22,19 @@ class QuoteRepository:
         )
         return quote_obj, created
 
-    # 모든 명언 조회 (임시 함수입니다. **변경이 필요하며** 추후 삭제 또는 이관을 검토합니다.)
+    @staticmethod
+    async def delete_all_quotes() -> int:
+        """
+        명언 테이블의 모든 데이터를 삭제합니다.
+        :return: int 삭제된 명언의 수
+        """
+        return await Quote.all().delete()
+
     @staticmethod
     async def get_all_quotes() -> List[Quote]:
+        """
+        명언테이블의 모든 명언을 조회합니다.
+        """
         return await Quote.all()
 
     @staticmethod

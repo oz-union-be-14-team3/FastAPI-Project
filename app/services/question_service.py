@@ -20,6 +20,13 @@ class QuestionService:
         """랜덤 질문 1개 반환"""
         return await self.repository.get_random_question()
 
+    async def delete_all_questions(self) -> int:
+        """
+        질문 테이블의 모든 데이터를 지웁니다.
+        :return: int 삭제된 질문의 수
+        """
+        return self.repository.delete_all_questions()
+
     async def save_scraping(self) -> int:
         """
         스크래핑을 실행하고 파싱된 데이터를 DB에 저장하는 서비스입니다.

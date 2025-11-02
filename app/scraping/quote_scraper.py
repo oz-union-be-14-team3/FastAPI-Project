@@ -7,7 +7,6 @@ from typing import Optional, List, Dict
 async def fetch_html(url: str) -> Optional[str]:
     """
     주어진 URL에서 HTML 내용을 Playwright를 사용하여 JavaScript가 로드된 후의 HTML 내용을 가져옵니다.
-    추후 주석의 코드로 대체될 가능성이 있습니다. (임시)
     """
     async with async_playwright() as p:
         # Chromium 브라우저를 헤드리스 모드로 시작
@@ -33,22 +32,6 @@ async def fetch_html(url: str) -> Optional[str]:
 
         finally:
             await browser.close()
-    ''' 기존코드
-    async with httpx.AsyncClient() as client:
-        try:
-            # 기본 설정 (타임아웃 포함)
-            response = await client.get(url, timeout=10)
-            response.raise_for_status()
-
-            return response.text
-
-        except httpx.HTTPStatusError as e:
-            print(f"Fetcher HTTP Error: {e.response.status_code} on {url}")
-            return None
-        except Exception as e:
-            print(f"Fetcher Network Error: {e}")
-            return None
-    '''
 
 
 def parse_quotes_from_html(html_content: str) -> List[Dict[str, str]]:
@@ -63,11 +46,10 @@ def parse_quotes_from_html(html_content: str) -> List[Dict[str, str]]:
     # 파싱 시작 (html.parser와 달리 별도설치 필요. 성능빠름.)
     soup = BeautifulSoup(html_content, 'lxml')
 
-    # 사이트의 원하는 셀렉터를 알아와 고쳐야합니다. (임시)
-    for element in soup.find_all('div', class_='quote'):  # 임시. quote-card로 변경
+    for element in soup.find_all('div', class_='quote-card'):
         try:
-            quote_text = element.find('p', class_='message').get_text(strip=True) # 임시. quote_message로 변경
-            author_name = element.find('p', class_='author').get_text(strip=True) # 임시. author_name로 변경
+            quote_text = element.find('p', class_='quote_message로').get_text(strip=True)
+            author_name = element.find('p', class_='author_name로').get_text(strip=True)
 
             quotes_data.append({
                 "content": quote_text,

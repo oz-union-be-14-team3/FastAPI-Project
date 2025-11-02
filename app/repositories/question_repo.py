@@ -22,6 +22,13 @@ class QuestionRepository:
         )
         return question_obj, created
 
+    @staticmethod
+    async def delete_all_questions() -> int:
+        """
+        질문 테이블의 모든 데이터를 삭제합니다.
+        :return: int 삭제된 질문의 수
+        """
+        return await Question.all().delete()
 
     @staticmethod
     async def get_all_questions() -> List[Question]:
